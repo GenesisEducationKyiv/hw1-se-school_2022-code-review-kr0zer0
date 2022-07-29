@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/go-resty/resty/v2"
 	"github.com/simonnilsson/ask"
+	"os"
 )
 
 type CryptoService struct {
@@ -22,7 +23,7 @@ func (s *CryptoService) GetCurrentExchangeRate() (float64, error) {
 			"symbol":  "BTC",
 			"convert": "UAH",
 		}).
-		SetHeader("X-CMC_PRO_API_KEY", "55c0acb9-6fa3-40ff-88b6-916b7a2838de").
+		SetHeader("X-CMC_PRO_API_KEY", os.Getenv("COINMARKETCAP_API_KEY")).
 		Get(url)
 	if err != nil {
 		return 0, err

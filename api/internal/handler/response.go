@@ -14,6 +14,6 @@ func newErrorResponse(c *gin.Context, statusCode int, message string) {
 	c.AbortWithStatusJSON(statusCode, errorResponse{message})
 }
 
-type getRateResponse struct {
-	Rate float64 `json:"rate"`
+type statusResponse struct {
+	Status string `json:"status"`
 }

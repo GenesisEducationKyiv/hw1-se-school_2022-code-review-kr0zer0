@@ -12,5 +12,5 @@ func (h *Handler) getCurrentExchangeRate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, getRateResponse{Rate: rate})
+	c.JSON(http.StatusOK, rate)
 }

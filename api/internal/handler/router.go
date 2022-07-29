@@ -20,8 +20,8 @@ func (h *Handler) InitRouter(port string) error {
 
 	base := router.Group("/api")
 	base.GET("/rate", h.getCurrentExchangeRate)
-	base.POST("/subscribe")
-	base.POST("/sendEmails")
+	base.POST("/subscribe", h.subscribe)
+	base.POST("/sendEmails", h.sendEmails)
 
 	return router.Run(port)
 }
