@@ -51,7 +51,7 @@ func (s *EmailSubscriptionService) SendToAll() error {
 		return err
 	}
 
-	err = s.emailSendingRepo.SendToList(emails, fmt.Sprintf("%.2f", rate))
+	err = s.emailSendingRepo.SendToList(emails, fmt.Sprintf("%.2fUAH", rate))
 	if err != nil {
 		return err
 	}

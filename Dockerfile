@@ -10,4 +10,7 @@ RUN go mod download
 COPY api/ .
 
 RUN cd main/; go build
+
+EXPOSE 8000
+
 CMD ["main/main"]

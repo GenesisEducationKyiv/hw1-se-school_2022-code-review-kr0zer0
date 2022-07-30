@@ -24,7 +24,7 @@ func (r EmailSendingRepository) SendToList(emails []string, message string) erro
 			FromEmail: "krokkozerro@gmail.com",
 			FromName:  "BTC app",
 			Recipients: []mailjet.Recipient{
-				mailjet.Recipient{
+				{
 					Email: email,
 				},
 			},
