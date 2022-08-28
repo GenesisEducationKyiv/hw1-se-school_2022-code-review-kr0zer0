@@ -12,7 +12,10 @@ type EmailSubscriptionService struct {
 	cryptoService    Crypto
 }
 
-func NewEmailSubscriptionService(emailSubsRepo repository.EmailSubscription, emailSendingRepo repository.EmailSending, cryptoService Crypto) *EmailSubscriptionService {
+func NewEmailSubscriptionService(
+	emailSubsRepo repository.EmailSubscription,
+	emailSendingRepo repository.EmailSending,
+	cryptoService Crypto) *EmailSubscriptionService {
 	return &EmailSubscriptionService{
 		emailSubsRepo:    emailSubsRepo,
 		emailSendingRepo: emailSendingRepo,
@@ -20,7 +23,7 @@ func NewEmailSubscriptionService(emailSubsRepo repository.EmailSubscription, ema
 	}
 }
 
-var EmailDuplErr = errors.New("this email already exists")
+var ErrEmailDupl = errors.New("this email already exists")
 
 func (s *EmailSubscriptionService) Subscribe(email string) error {
 	exists, err := s.emailSubsRepo.CheckIfExists(email)
@@ -29,7 +32,7 @@ func (s *EmailSubscriptionService) Subscribe(email string) error {
 	}
 
 	if exists {
-		return EmailDuplErr
+		return ErrEmailDupl
 	}
 
 	err = s.emailSubsRepo.Add(email)

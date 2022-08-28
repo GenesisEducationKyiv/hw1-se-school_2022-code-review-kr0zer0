@@ -16,10 +16,10 @@ type Service struct {
 	EmailSub
 }
 
-func NewService(repository *repository.Repository) *Service {
+func NewService(repositories *repository.Repository) *Service {
 	crypto := NewCryptoService()
 	return &Service{
 		Crypto:   crypto,
-		EmailSub: NewEmailSubscriptionService(repository.EmailSubscription, repository.EmailSending, crypto),
+		EmailSub: NewEmailSubscriptionService(repositories.EmailSubscription, repositories.EmailSending, crypto),
 	}
 }

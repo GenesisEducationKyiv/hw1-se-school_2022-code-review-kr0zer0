@@ -4,8 +4,9 @@ import (
 	"api/internal/command"
 	"api/internal/service"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func (h *Handler) sendEmails(c *gin.Context) {
@@ -29,7 +30,7 @@ func (h *Handler) subscribe(c *gin.Context) {
 
 	err = h.services.Subscribe(input.Email)
 	if err != nil {
-		if errors.Is(err, service.EmailDuplErr) {
+		if errors.Is(err, service.ErrEmailDupl) {
 			newErrorResponse(c, http.StatusConflict, err.Error())
 			return
 		}

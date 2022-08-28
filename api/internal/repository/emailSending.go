@@ -2,8 +2,9 @@ package repository
 
 import (
 	"fmt"
-	"github.com/mailjet/mailjet-apiv3-go"
 	"os"
+
+	"github.com/mailjet/mailjet-apiv3-go"
 )
 
 type EmailSendingRepository struct {

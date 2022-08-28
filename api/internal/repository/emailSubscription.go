@@ -2,7 +2,7 @@ package repository
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 
 	"api/data"
 )
@@ -16,6 +16,8 @@ func NewEmailSubscriptionRepository(filepath string) *EmailSubscriptionRepositor
 		filepath: filepath,
 	}
 }
+
+const WriteFilePerm = 0o600
 
 func (r *EmailSubscriptionRepository) Add(email string) error {
 	emails, err := r.GetAll()
@@ -34,7 +36,7 @@ func (r *EmailSubscriptionRepository) Add(email string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(r.filepath, updatedData, 0644)
+	err = os.WriteFile(r.filepath, updatedData, WriteFilePerm)
 	if err != nil {
 		return err
 	}
@@ -59,7 +61,7 @@ func (r *EmailSubscriptionRepository) CheckIfExists(emailToFind string) (bool, e
 
 func (r *EmailSubscriptionRepository) GetAll() ([]string, error) {
 	records := data.Data{}
-	file, err := ioutil.ReadFile(r.filepath)
+	file, err := os.ReadFile(r.filepath)
 	if err != nil {
 		return nil, err
 	}

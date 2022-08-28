@@ -3,9 +3,10 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"os"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/simonnilsson/ask"
-	"os"
 )
 
 type CryptoService struct {
