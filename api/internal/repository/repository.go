@@ -3,7 +3,6 @@ package repository
 type EmailSubscription interface {
 	Add(email string) error
 	GetAll() ([]string, error)
-	CheckIfExists(emailToFind string) (bool, error)
 }
 
 type EmailSending interface {

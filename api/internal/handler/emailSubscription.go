@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"api/internal/command"
-	"api/internal/service"
+	"api/internal/customerrors"
+	"api/internal/inputs"
 	"errors"
 	"net/http"
 
@@ -20,7 +20,7 @@ func (h *Handler) sendEmails(c *gin.Context) {
 }
 
 func (h *Handler) subscribe(c *gin.Context) {
-	var input command.Subscribing
+	var input inputs.Subscribing
 
 	err := c.ShouldBind(&input)
 	if err != nil {
@@ -30,7 +30,7 @@ func (h *Handler) subscribe(c *gin.Context) {
 
 	err = h.services.Subscribe(input.Email)
 	if err != nil {
-		if errors.Is(err, service.ErrEmailDupl) {
+		if errors.Is(err, customerrors.ErrEmailDuplicate) {
 			newErrorResponse(c, http.StatusConflict, err.Error())
 			return
 		}

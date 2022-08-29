@@ -2,7 +2,6 @@ package service
 
 import (
 	"api/internal/repository"
-	"errors"
 	"fmt"
 )
 
@@ -23,19 +22,8 @@ func NewEmailSubscriptionService(
 	}
 }
 
-var ErrEmailDupl = errors.New("this email already exists")
-
 func (s *EmailSubscriptionService) Subscribe(email string) error {
-	exists, err := s.emailSubsRepo.CheckIfExists(email)
-	if err != nil {
-		return err
-	}
-
-	if exists {
-		return ErrEmailDupl
-	}
-
-	err = s.emailSubsRepo.Add(email)
+	err := s.emailSubsRepo.Add(email)
 	if err != nil {
 		return err
 	}

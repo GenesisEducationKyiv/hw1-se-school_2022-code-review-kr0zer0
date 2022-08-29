@@ -1,8 +1,11 @@
 package repository
 
 import (
+	"api/internal/constants"
+	customerrors "api/internal/customerrors"
 	"encoding/json"
 	"os"
+	"sort"
 
 	"api/data"
 )
@@ -17,17 +20,18 @@ func NewEmailSubscriptionRepository(filepath string) *EmailSubscriptionRepositor
 	}
 }
 
-const WriteFilePerm = 0o600
-
 func (r *EmailSubscriptionRepository) Add(email string) error {
 	emails, err := r.GetAll()
 	if err != nil {
 		return err
 	}
 
-	emails = append(emails, email)
+	emails, err = r.addToSorted(emails, email)
+	if err != nil {
+		return err
+	}
 
-	records := data.Data{
+	records := data.SubscribedEmails{
 		Emails: emails,
 	}
 
@@ -36,7 +40,7 @@ func (r *EmailSubscriptionRepository) Add(email string) error {
 		return err
 	}
 
-	err = os.WriteFile(r.filepath, updatedData, WriteFilePerm)
+	err = os.WriteFile(r.filepath, updatedData, constants.WriteFilePerm)
 	if err != nil {
 		return err
 	}
@@ -44,23 +48,8 @@ func (r *EmailSubscriptionRepository) Add(email string) error {
 	return nil
 }
 
-func (r *EmailSubscriptionRepository) CheckIfExists(emailToFind string) (bool, error) {
-	records, err := r.GetAll()
-	if err != nil {
-		return false, err
-	}
-
-	for _, email := range records {
-		if email == emailToFind {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
 func (r *EmailSubscriptionRepository) GetAll() ([]string, error) {
-	records := data.Data{}
+	records := data.SubscribedEmails{}
 	file, err := os.ReadFile(r.filepath)
 	if err != nil {
 		return nil, err
@@ -71,4 +60,19 @@ func (r *EmailSubscriptionRepository) GetAll() ([]string, error) {
 		return nil, err
 	}
 	return records.Emails, nil
+}
+
+func (r *EmailSubscriptionRepository) addToSorted(sourceSlice []string, itemToAdd string) ([]string, error) {
+	index := sort.SearchStrings(sourceSlice, itemToAdd)
+	if index != len(sourceSlice) {
+		if sourceSlice[index] == itemToAdd {
+			return nil, customerrors.ErrEmailDuplicate
+		}
+	}
+
+	sourceSlice = append(sourceSlice, "")
+	copy(sourceSlice[index+1:], sourceSlice[index:])
+	sourceSlice[index] = itemToAdd
+
+	return sourceSlice, nil
 }

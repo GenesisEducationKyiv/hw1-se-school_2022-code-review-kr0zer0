@@ -1,5 +1,5 @@
 package data
 
-type Data struct {
+type SubscribedEmails struct {
 	Emails []string `json:"emails"`
 }
