@@ -1,9 +1,13 @@
 package service
 
-import "api/internal/repository"
+import (
+	"api/config"
+	"api/internal/repository"
+)
 
 type Crypto interface {
-	GetCurrentExchangeRate() (float64, error)
+	GetCurrentExchangeRate(cryptoSymbol, fiatSymbol string) (float64, error)
+	GetBtcUahRate() (float64, error)
 }
 
 type EmailSub interface {
@@ -16,8 +20,8 @@ type Service struct {
 	EmailSub
 }
 
-func NewService(repositories *repository.Repository) *Service {
-	crypto := NewCryptoService()
+func NewService(repositories *repository.Repository, cfg *config.Config) *Service {
+	crypto := NewCryptoService(cfg)
 	return &Service{
 		Crypto:   crypto,
 		EmailSub: NewEmailSubscriptionService(repositories.EmailSubscription, repositories.EmailSending, crypto),

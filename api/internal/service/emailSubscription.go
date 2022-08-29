@@ -49,7 +49,7 @@ func (s *EmailSubscriptionService) SendToAll() error {
 		return err
 	}
 
-	rate, err := s.cryptoService.GetCurrentExchangeRate()
+	rate, err := s.cryptoService.GetBtcUahRate()
 	if err != nil {
 		return err
 	}

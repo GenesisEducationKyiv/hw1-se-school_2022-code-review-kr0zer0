@@ -1,31 +1,34 @@
 package service
 
 import (
+	"api/config"
 	"encoding/json"
 	"errors"
-	"os"
+	"fmt"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/simonnilsson/ask"
 )
 
 type CryptoService struct {
+	cfg *config.Config
 }
 
-func NewCryptoService() *CryptoService {
-	return &CryptoService{}
+func NewCryptoService(cfg *config.Config) *CryptoService {
+	return &CryptoService{
+		cfg: cfg,
+	}
 }
 
-func (s *CryptoService) GetCurrentExchangeRate() (float64, error) {
-	url := "https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest"
+func (s *CryptoService) GetCurrentExchangeRate(cryptoSymbol, fiatSymbol string) (float64, error) {
 	client := resty.New()
 	response, err := client.R().
 		SetQueryParams(map[string]string{
-			"symbol":  "BTC",
-			"convert": "UAH",
+			"symbol":  cryptoSymbol,
+			"convert": fiatSymbol,
 		}).
-		SetHeader("X-CMC_PRO_API_KEY", os.Getenv("COINMARKETCAP_API_KEY")).
-		Get(url)
+		SetHeader(s.cfg.CryptoAPI.HeaderName, s.cfg.CryptoAPI.APIKey).
+		Get(s.cfg.CryptoAPI.URL)
 	if err != nil {
 		return 0, err
 	}
@@ -36,10 +39,15 @@ func (s *CryptoService) GetCurrentExchangeRate() (float64, error) {
 		return 0, err
 	}
 
-	price, ok := ask.For(mappedResponse, "data.BTC[0].quote.UAH.price").Float(0)
+	queryString := fmt.Sprintf("data.%s[0].quote.%s.price", cryptoSymbol, fiatSymbol)
+	price, ok := ask.For(mappedResponse, queryString).Float(0)
 	if !ok {
 		return price, errors.New("incorrect path when parsing JSON")
 	}
 
 	return price, nil
+}
+
+func (s *CryptoService) GetBtcUahRate() (float64, error) {
+	return s.GetCurrentExchangeRate("BTC", "UAH")
 }

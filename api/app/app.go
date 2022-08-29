@@ -1,16 +1,19 @@
 package app
 
 import (
+	"api/config"
 	"api/internal/handler"
 	"api/internal/repository"
 	"api/internal/service"
 )
 
 func Run() error {
-	repos := repository.NewRepository("./data/data.json")
-	services := service.NewService(repos)
+	cfg := config.GetConfig()
+
+	repos := repository.NewRepository(cfg.Database.FilePath)
+	services := service.NewService(repos, cfg)
 	handlers := handler.NewHandler(services)
-	err := handlers.InitRouter(":8000")
+	err := handlers.InitRouter(cfg.App.Port)
 	if err != nil {
 		return err
 	}
