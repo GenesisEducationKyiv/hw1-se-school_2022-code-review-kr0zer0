@@ -1,5 +1,11 @@
 package repository
 
+import (
+	"api/config"
+
+	"github.com/mailjet/mailjet-apiv3-go"
+)
+
 type EmailSubscription interface {
 	Add(email string) error
 	GetAll() ([]string, error)
@@ -14,9 +20,9 @@ type Repository struct {
 	EmailSending
 }
 
-func NewRepository(filepath string) *Repository {
+func NewRepository(filepath string, cfg *config.Config, mailjetClient *mailjet.Client) *Repository {
 	return &Repository{
 		EmailSubscription: NewEmailSubscriptionRepository(filepath),
-		EmailSending:      NewEmailSendingRepository(),
+		EmailSending:      NewEmailSendingRepository(cfg, mailjetClient),
 	}
 }

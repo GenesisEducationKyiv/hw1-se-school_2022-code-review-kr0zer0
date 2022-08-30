@@ -8,11 +8,15 @@ import (
 )
 
 type EmailSendingRepository struct {
-	cfg *config.Config
+	cfg           *config.Config
+	mailjetClient *mailjet.Client
 }
 
-func NewEmailSendingRepository() *EmailSendingRepository {
-	return &EmailSendingRepository{}
+func NewEmailSendingRepository(cfg *config.Config, mailjetClient *mailjet.Client) *EmailSendingRepository {
+	return &EmailSendingRepository{
+		cfg:           cfg,
+		mailjetClient: mailjetClient,
+	}
 }
 
 func (r *EmailSendingRepository) SendToList(emails []string, message string) error {
@@ -22,12 +26,11 @@ func (r *EmailSendingRepository) SendToList(emails []string, message string) err
 
 	sendingList := r.FormSendingList(emails, message)
 
-	mailjetClient := mailjet.NewMailjetClient(r.cfg.EmailSending.PublicKey, r.cfg.EmailSending.PrivateKey)
 	email := &mailjet.InfoSendMail{
 		Messages: sendingList,
 	}
 
-	_, err := mailjetClient.SendMail(email)
+	_, err := r.mailjetClient.SendMail(email)
 	if err != nil {
 		return err
 	}

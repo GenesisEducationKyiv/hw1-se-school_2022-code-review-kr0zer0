@@ -6,17 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Handler struct {
+type HTTPHandler struct {
 	services *service.Service
 }
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{
+func NewHandler(services *service.Service) *HTTPHandler {
+	return &HTTPHandler{
 		services: services,
 	}
 }
 
-func (h *Handler) InitRouter(port string) error {
+func (h *HTTPHandler) InitRouter(port string) error {
 	router := gin.Default()
 
 	base := router.Group("/api")
