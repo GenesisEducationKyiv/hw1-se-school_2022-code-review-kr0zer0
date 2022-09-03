@@ -5,6 +5,8 @@ import (
 	"api/internal/repository"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
 type Crypto interface {
 	GetCurrentExchangeRate(cryptoSymbol, fiatSymbol string) (float64, error)
 	GetBtcUahRate() (float64, error)

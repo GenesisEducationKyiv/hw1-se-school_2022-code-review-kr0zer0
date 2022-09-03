@@ -4,7 +4,9 @@ go 1.18
 
 require (
 	github.com/gin-gonic/gin v1.8.1
+	github.com/go-playground/assert/v2 v2.0.1
 	github.com/go-resty/resty/v2 v2.7.0
+	github.com/golang/mock v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.3.0
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394
 	github.com/simonnilsson/ask v0.2.0
