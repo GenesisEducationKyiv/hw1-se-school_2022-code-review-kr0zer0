@@ -24,6 +24,5 @@ func (h *HTTPHandler) InitRouter() *gin.Engine {
 	base.POST("/subscribe", h.subscribe)
 	base.POST("/sendEmails", h.sendEmails)
 
-	//return router.Run(port)
 	return router
 }

@@ -65,7 +65,6 @@ func TestHTTPHandler_sendMails(t *testing.T) {
 
 			assert.Equal(t, testCase.expectedStatusCode, responseRecorder.Code)
 			assert.Equal(t, testCase.expectedResponseBody, responseRecorder.Body.String())
-
 		})
 	}
 }
@@ -105,7 +104,7 @@ func TestHTTPHandler_subscribe(t *testing.T) {
 				s.EXPECT().Subscribe(email).Return(customerrors.ErrEmailDuplicate)
 			},
 			expectedStatusCode:   http.StatusConflict,
-			expectedResponseBody: fmt.Sprintf(`{"message":"%s"}`, customerrors.ErrEmailDuplicate.Error()),
+			expectedResponseBody: fmt.Sprintf(`{"message":"%v"}`, customerrors.ErrEmailDuplicate.Error()),
 		},
 		{
 			name:       "Some internal error",

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"path/filepath"
 	"runtime"
 	"sync"
@@ -28,17 +27,16 @@ type Config struct {
 	} `yaml:"database"`
 }
 
-var cfg = &Config{}
-var once sync.Once
-
 func GetConfig() *Config {
+	var cfg = &Config{}
+	var once sync.Once
+
 	_, b, _, _ := runtime.Caller(0)
 	basepath := filepath.Dir(b)
 
 	once.Do(func() {
 		err := cleanenv.ReadConfig(filepath.Join(basepath, "config.yml"), cfg)
 		if err != nil {
-			fmt.Println(err)
 			return
 		}
 	})

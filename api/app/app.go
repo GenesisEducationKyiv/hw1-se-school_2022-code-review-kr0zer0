@@ -5,6 +5,7 @@ import (
 	"api/internal/handler"
 	"api/internal/repository"
 	"api/internal/service"
+
 	"github.com/mailjet/mailjet-apiv3-go"
 )
 

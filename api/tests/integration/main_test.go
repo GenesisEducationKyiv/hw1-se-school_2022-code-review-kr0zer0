@@ -7,11 +7,12 @@ import (
 	"api/internal/repository"
 	mock_repository "api/internal/repository/mocks"
 	"api/internal/service"
+	"os"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/suite"
-	"os"
-	"testing"
 )
 
 const TestDataPath = "../data/data.json"

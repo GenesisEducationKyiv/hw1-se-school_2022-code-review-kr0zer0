@@ -2,8 +2,9 @@ package repository
 
 import (
 	"api/internal/customerrors"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEmailSubscriptionRepository_addToSorted(t *testing.T) {

@@ -62,8 +62,6 @@ func TestHTTPHandler_getCurrentExchangeRate(t *testing.T) {
 
 			assert.Equal(t, testCase.expectedStatusCode, responseRecorder.Code)
 			assert.Equal(t, testCase.expectedResponseBody, responseRecorder.Body.String())
-
 		})
 	}
-
 }
