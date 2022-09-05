@@ -12,8 +12,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHTTPHandler_sendMails(t *testing.T) {
@@ -138,7 +138,6 @@ func TestHTTPHandler_subscribe(t *testing.T) {
 
 			assert.Equal(t, testCase.expectedStatusCode, responseRecorder.Code)
 			assert.Equal(t, testCase.expectedResponseBody, responseRecorder.Body.String())
-
 		})
 	}
 }

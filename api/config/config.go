@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+	"path/filepath"
+	"runtime"
 	"sync"
 
 	"github.com/ilyakaznacheev/cleanenv"
@@ -19,19 +22,23 @@ type Config struct {
 		SenderAddress string `env-required:"true" yaml:"senderAddress"`
 		PublicKey     string `env-required:"true" env:"MAILJET_PUBLIC_KEY"`
 		PrivateKey    string `env-required:"true" env:"MAILJET_PRIVATE_KEY"`
-	}
+	} `yaml:"emailSending"`
 	Database struct {
 		FilePath string `env-required:"true" yaml:"filePath"`
 	} `yaml:"database"`
 }
 
+var cfg = &Config{}
+var once sync.Once
+
 func GetConfig() *Config {
-	var cfg = &Config{}
-	var once sync.Once
+	_, b, _, _ := runtime.Caller(0)
+	basepath := filepath.Dir(b)
 
 	once.Do(func() {
-		err := cleanenv.ReadConfig("config/config.yml", cfg)
+		err := cleanenv.ReadConfig(filepath.Join(basepath, "config.yml"), cfg)
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
 	})
