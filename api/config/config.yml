@@ -1,0 +1,12 @@
+app:
+  port: ':8000'
+
+cryptoApi:
+  url: 'https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest'
+  headerName: 'X-CMC_PRO_API_KEY'
+
+mailSending:
+  senderAddress: 'krokkozerro@gmail.com'
+
+database:
+  filePath: './data/data.json'
