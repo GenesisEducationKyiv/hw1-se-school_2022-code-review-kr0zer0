@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 
 	"github.com/golang/mock/gomock"
-
 	"github.com/stretchr/testify/assert"
 )
 
