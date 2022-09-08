@@ -16,7 +16,7 @@ func NewHandler(services *service.Service) *HTTPHandler {
 	}
 }
 
-func (h *HTTPHandler) InitRouter(port string) error {
+func (h *HTTPHandler) InitRouter() *gin.Engine {
 	router := gin.Default()
 
 	base := router.Group("/api")
@@ -24,5 +24,5 @@ func (h *HTTPHandler) InitRouter(port string) error {
 	base.POST("/subscribe", h.subscribe)
 	base.POST("/sendEmails", h.sendEmails)
 
-	return router.Run(port)
+	return router
 }

@@ -6,6 +6,8 @@ import (
 	"github.com/mailjet/mailjet-apiv3-go"
 )
 
+//go:generate mockgen -source=repository.go -destination=mocks/mock.go
+
 type EmailSubscription interface {
 	Add(email string) error
 	GetAll() ([]string, error)

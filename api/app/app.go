@@ -16,7 +16,8 @@ func Run() error {
 	repos := repository.NewRepository(cfg.Database.FilePath, cfg, mailjetClient)
 	services := service.NewService(repos, cfg)
 	handlers := handler.NewHandler(services)
-	err := handlers.InitRouter(cfg.App.Port)
+	router := handlers.InitRouter()
+	err := router.Run(cfg.App.Port)
 	if err != nil {
 		return err
 	}
