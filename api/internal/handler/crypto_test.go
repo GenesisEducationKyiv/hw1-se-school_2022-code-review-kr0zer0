@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"api/internal/service"
 	mock_service "api/internal/service/mocks"
 	"errors"
 	"net/http"
@@ -49,7 +48,7 @@ func TestHTTPHandler_getCurrentExchangeRate(t *testing.T) {
 			cryptoServiceMock := mock_service.NewMockCrypto(mockController)
 			testCase.mockBehavior(cryptoServiceMock)
 
-			services := &service.Service{Crypto: cryptoServiceMock}
+			services := &Service{CryptoService: cryptoServiceMock}
 			handler := NewHandler(services)
 
 			r := gin.New()
@@ -62,8 +61,6 @@ func TestHTTPHandler_getCurrentExchangeRate(t *testing.T) {
 
 			assert.Equal(t, testCase.expectedStatusCode, responseRecorder.Code)
 			assert.Equal(t, testCase.expectedResponseBody, responseRecorder.Body.String())
-
 		})
 	}
-
 }

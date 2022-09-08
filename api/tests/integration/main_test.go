@@ -7,11 +7,12 @@ import (
 	"api/internal/repository"
 	mock_repository "api/internal/repository/mocks"
 	"api/internal/service"
+	"os"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/suite"
-	"os"
-	"testing"
 )
 
 const TestDataPath = "../data/data.json"
@@ -21,8 +22,8 @@ type IntegrationTestSuite struct {
 
 	cfg      *config.Config
 	handler  *handler.HTTPHandler
-	services *service.Service
-	repos    *repository.Repository
+	services *handler.Service
+	repos    *service.Repository
 
 	emailSendingMock *mock_repository.MockEmailSending
 }
@@ -62,9 +63,9 @@ func (s *IntegrationTestSuite) initDeps() {
 	s.emailSendingMock = mock_repository.NewMockEmailSending(mockController)
 
 	s.cfg = config.GetConfig()
-	s.repos = &repository.Repository{
-		EmailSubscription: repository.NewEmailSubscriptionRepository(TestDataPath),
-		EmailSending:      s.emailSendingMock,
+	s.repos = &service.Repository{
+		EmailSubscriptionRepo: repository.NewEmailSubscriptionRepository(TestDataPath),
+		EmailSendingRepo:      s.emailSendingMock,
 	}
 	s.services = service.NewService(s.repos, s.cfg)
 	s.handler = handler.NewHandler(s.services)

@@ -10,7 +10,7 @@ import (
 )
 
 func (h *HTTPHandler) sendEmails(c *gin.Context) {
-	err := h.services.EmailSub.SendToAll()
+	err := h.services.EmailSubService.SendToAll()
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

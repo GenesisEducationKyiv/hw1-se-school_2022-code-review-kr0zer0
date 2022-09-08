@@ -1,16 +1,29 @@
 package handler
 
 import (
-	"api/internal/service"
-
 	"github.com/gin-gonic/gin"
 )
 
-type HTTPHandler struct {
-	services *service.Service
+type CryptoService interface {
+	GetCurrentExchangeRate(cryptoSymbol, fiatSymbol string) (float64, error)
+	GetBtcUahRate() (float64, error)
 }
 
-func NewHandler(services *service.Service) *HTTPHandler {
+type EmailSubService interface {
+	SendToAll() error
+	Subscribe(email string) error
+}
+
+type Service struct {
+	CryptoService
+	EmailSubService
+}
+
+type HTTPHandler struct {
+	services *Service
+}
+
+func NewHandler(services *Service) *HTTPHandler {
 	return &HTTPHandler{
 		services: services,
 	}
@@ -24,6 +37,5 @@ func (h *HTTPHandler) InitRouter() *gin.Engine {
 	base.POST("/subscribe", h.subscribe)
 	base.POST("/sendEmails", h.sendEmails)
 
-	//return router.Run(port)
 	return router
 }

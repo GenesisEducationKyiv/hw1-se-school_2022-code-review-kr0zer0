@@ -3,9 +3,10 @@ package integration
 import (
 	"api/internal/customerrors"
 	"fmt"
-	"github.com/golang/mock/gomock"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/golang/mock/gomock"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -20,7 +21,6 @@ func (s *IntegrationTestSuite) TestSubscribe() {
 
 	assert.Equal(s.T(), http.StatusOK, responseRecorder.Code)
 	assert.Equal(s.T(), `{"status":"subscribed"}`, responseRecorder.Body.String())
-
 }
 
 func (s *IntegrationTestSuite) TestSubscribe_EmptyInput() {
@@ -33,7 +33,6 @@ func (s *IntegrationTestSuite) TestSubscribe_EmptyInput() {
 
 	assert.Equal(s.T(), http.StatusBadRequest, responseRecorder.Code)
 	assert.Equal(s.T(), `{"message":"Email field is required"}`, responseRecorder.Body.String())
-
 }
 
 func (s *IntegrationTestSuite) TestSubscribe_Duplicate() {
@@ -45,8 +44,9 @@ func (s *IntegrationTestSuite) TestSubscribe_Duplicate() {
 	router.ServeHTTP(responseRecorder, request)
 
 	assert.Equal(s.T(), http.StatusConflict, responseRecorder.Code)
-	assert.Equal(s.T(), fmt.Sprintf(`{"message":"%s"}`, customerrors.ErrEmailDuplicate.Error()), responseRecorder.Body.String())
-
+	assert.Equal(s.T(),
+		fmt.Sprintf(`{"message":"%v"}`, customerrors.ErrEmailDuplicate.Error()),
+		responseRecorder.Body.String())
 }
 
 func (s *IntegrationTestSuite) TestSendEmails() {
@@ -61,5 +61,4 @@ func (s *IntegrationTestSuite) TestSendEmails() {
 
 	assert.Equal(s.T(), http.StatusOK, responseRecorder.Code)
 	assert.Equal(s.T(), `{"status":"sent"}`, responseRecorder.Body.String())
-
 }
