@@ -1,9 +1,10 @@
 package service
 
 import (
-	"api/config"
 	"api/internal/handler"
 )
+
+//go:generate mockgen -source=service.go -destination=mocks/repoMock.go
 
 type EmailSubscriptionRepo interface {
 	Add(email string) error
@@ -19,8 +20,8 @@ type Repository struct {
 	EmailSendingRepo
 }
 
-func NewService(repositories *Repository, cfg *config.Config) *handler.Service {
-	crypto := NewCryptoService(cfg)
+func NewService(repositories *Repository, cryptoProvider CryptoProvider) *handler.Service {
+	crypto := NewCryptoService(cryptoProvider)
 	return &handler.Service{
 		CryptoService: crypto,
 		EmailSubService: NewEmailSubscriptionService(

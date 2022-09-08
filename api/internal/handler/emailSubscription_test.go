@@ -2,7 +2,7 @@ package handler
 
 import (
 	"api/internal/customerrors"
-	mock_service "api/internal/service/mocks"
+	mock_handler "api/internal/handler/mocks"
 	"bytes"
 	"errors"
 	"fmt"
@@ -16,7 +16,7 @@ import (
 )
 
 func TestHTTPHandler_sendMails(t *testing.T) {
-	type mockBehavior func(s *mock_service.MockEmailSub)
+	type mockBehavior func(s *mock_handler.MockEmailSubService)
 
 	type test struct {
 		name                 string
@@ -28,7 +28,7 @@ func TestHTTPHandler_sendMails(t *testing.T) {
 	testTable := []test{
 		{
 			name: "OK",
-			mockBehavior: func(s *mock_service.MockEmailSub) {
+			mockBehavior: func(s *mock_handler.MockEmailSubService) {
 				s.EXPECT().SendToAll().Return(nil)
 			},
 			expectedStatusCode:   http.StatusOK,
@@ -36,7 +36,7 @@ func TestHTTPHandler_sendMails(t *testing.T) {
 		},
 		{
 			name: "Error",
-			mockBehavior: func(s *mock_service.MockEmailSub) {
+			mockBehavior: func(s *mock_handler.MockEmailSubService) {
 				s.EXPECT().SendToAll().Return(errors.New("some error"))
 			},
 			expectedStatusCode:   http.StatusInternalServerError,
@@ -48,7 +48,7 @@ func TestHTTPHandler_sendMails(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			mockController := gomock.NewController(t)
 
-			emailSubMock := mock_service.NewMockEmailSub(mockController)
+			emailSubMock := mock_handler.NewMockEmailSubService(mockController)
 			testCase.mockBehavior(emailSubMock)
 
 			services := &Service{EmailSubService: emailSubMock}
@@ -69,7 +69,7 @@ func TestHTTPHandler_sendMails(t *testing.T) {
 }
 
 func TestHTTPHandler_subscribe(t *testing.T) {
-	type mockBehavior func(s *mock_service.MockEmailSub, email string)
+	type mockBehavior func(s *mock_handler.MockEmailSubService, email string)
 
 	type test struct {
 		name                 string
@@ -83,7 +83,7 @@ func TestHTTPHandler_subscribe(t *testing.T) {
 		{
 			name:       "OK",
 			emailInput: "some.email@mail.com",
-			mockBehavior: func(s *mock_service.MockEmailSub, email string) {
+			mockBehavior: func(s *mock_handler.MockEmailSubService, email string) {
 				s.EXPECT().Subscribe(email).Return(nil)
 			},
 			expectedStatusCode:   http.StatusOK,
@@ -91,7 +91,7 @@ func TestHTTPHandler_subscribe(t *testing.T) {
 		},
 		{
 			name: "No email input",
-			mockBehavior: func(s *mock_service.MockEmailSub, email string) {
+			mockBehavior: func(s *mock_handler.MockEmailSubService, email string) {
 			},
 			expectedStatusCode:   http.StatusBadRequest,
 			expectedResponseBody: `{"message":"Email field is required"}`,
@@ -99,7 +99,7 @@ func TestHTTPHandler_subscribe(t *testing.T) {
 		{
 			name:       "Email duplicate",
 			emailInput: "some.email@mail.com",
-			mockBehavior: func(s *mock_service.MockEmailSub, email string) {
+			mockBehavior: func(s *mock_handler.MockEmailSubService, email string) {
 				s.EXPECT().Subscribe(email).Return(customerrors.ErrEmailDuplicate)
 			},
 			expectedStatusCode:   http.StatusConflict,
@@ -108,7 +108,7 @@ func TestHTTPHandler_subscribe(t *testing.T) {
 		{
 			name:       "Some internal error",
 			emailInput: "some.email@mail.com",
-			mockBehavior: func(s *mock_service.MockEmailSub, email string) {
+			mockBehavior: func(s *mock_handler.MockEmailSubService, email string) {
 				s.EXPECT().Subscribe(email).Return(errors.New("some error"))
 			},
 			expectedStatusCode:   http.StatusInternalServerError,
@@ -120,7 +120,7 @@ func TestHTTPHandler_subscribe(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			mockController := gomock.NewController(t)
 
-			emailSubMock := mock_service.NewMockEmailSub(mockController)
+			emailSubMock := mock_handler.NewMockEmailSubService(mockController)
 			testCase.mockBehavior(emailSubMock, testCase.emailInput)
 
 			services := &Service{EmailSubService: emailSubMock}

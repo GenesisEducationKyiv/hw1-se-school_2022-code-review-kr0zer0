@@ -1,7 +1,7 @@
 package handler
 
 import (
-	mock_service "api/internal/service/mocks"
+	mock_handler "api/internal/handler/mocks"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -13,7 +13,7 @@ import (
 )
 
 func TestHTTPHandler_getCurrentExchangeRate(t *testing.T) {
-	type mockBehavior func(s *mock_service.MockCrypto)
+	type mockBehavior func(s *mock_handler.MockCryptoService)
 
 	type test struct {
 		name                 string
@@ -25,7 +25,7 @@ func TestHTTPHandler_getCurrentExchangeRate(t *testing.T) {
 	testTable := []test{
 		{
 			name: "OK",
-			mockBehavior: func(s *mock_service.MockCrypto) {
+			mockBehavior: func(s *mock_handler.MockCryptoService) {
 				s.EXPECT().GetBtcUahRate().Return(777.777, nil)
 			},
 			expectedStatusCode:   http.StatusOK,
@@ -33,7 +33,7 @@ func TestHTTPHandler_getCurrentExchangeRate(t *testing.T) {
 		},
 		{
 			name: "Error",
-			mockBehavior: func(s *mock_service.MockCrypto) {
+			mockBehavior: func(s *mock_handler.MockCryptoService) {
 				s.EXPECT().GetBtcUahRate().Return(float64(0), errors.New("some error"))
 			},
 			expectedStatusCode:   http.StatusBadRequest,
@@ -45,7 +45,7 @@ func TestHTTPHandler_getCurrentExchangeRate(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			mockController := gomock.NewController(t)
 
-			cryptoServiceMock := mock_service.NewMockCrypto(mockController)
+			cryptoServiceMock := mock_handler.NewMockCryptoService(mockController)
 			testCase.mockBehavior(cryptoServiceMock)
 
 			services := &Service{CryptoService: cryptoServiceMock}

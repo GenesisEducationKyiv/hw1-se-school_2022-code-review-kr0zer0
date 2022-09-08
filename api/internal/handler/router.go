@@ -4,8 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//go:generate mockgen -source=router.go -destination=mocks/serviceMock.go
+
 type CryptoService interface {
-	GetCurrentExchangeRate(cryptoSymbol, fiatSymbol string) (float64, error)
 	GetBtcUahRate() (float64, error)
 }
 
