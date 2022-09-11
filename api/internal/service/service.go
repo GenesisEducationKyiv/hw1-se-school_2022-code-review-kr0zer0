@@ -1,31 +1,32 @@
 package service
 
 import (
-	"api/config"
-	"api/internal/repository"
+	"api/internal/handler"
 )
 
-//go:generate mockgen -source=service.go -destination=mocks/mock.go
+//go:generate mockgen -source=service.go -destination=mocks/repoMock.go
 
-type Crypto interface {
-	GetCurrentExchangeRate(cryptoSymbol, fiatSymbol string) (float64, error)
-	GetBtcUahRate() (float64, error)
+type EmailSubscriptionRepo interface {
+	Add(email string) error
+	GetAll() ([]string, error)
 }
 
-type EmailSub interface {
-	SendToAll() error
-	Subscribe(email string) error
+type EmailSendingRepo interface {
+	SendToList(emails []string, message string) error
 }
 
-type Service struct {
-	Crypto
-	EmailSub
+type Repository struct {
+	EmailSubscriptionRepo
+	EmailSendingRepo
 }
 
-func NewService(repositories *repository.Repository, cfg *config.Config) *Service {
-	crypto := NewCryptoService(cfg)
-	return &Service{
-		Crypto:   crypto,
-		EmailSub: NewEmailSubscriptionService(repositories.EmailSubscription, repositories.EmailSending, crypto),
+func NewService(repositories *Repository, cryptoProvider CryptoProvider) *handler.Service {
+	crypto := NewCryptoService(cryptoProvider)
+	return &handler.Service{
+		CryptoService: crypto,
+		EmailSubService: NewEmailSubscriptionService(
+			repositories.EmailSubscriptionRepo,
+			repositories.EmailSendingRepo, crypto,
+		),
 	}
 }

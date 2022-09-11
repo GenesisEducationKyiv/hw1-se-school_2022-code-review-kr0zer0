@@ -13,8 +13,10 @@ func Run() error {
 	cfg := config.GetConfig()
 	mailjetClient := mailjet.NewMailjetClient(cfg.EmailSending.PublicKey, cfg.EmailSending.PrivateKey)
 
+	coinMarketCapProvider := service.NewCoinMarketCapProvider(cfg)
+
 	repos := repository.NewRepository(cfg.Database.FilePath, cfg, mailjetClient)
-	services := service.NewService(repos, cfg)
+	services := service.NewService(repos, coinMarketCapProvider)
 	handlers := handler.NewHandler(services)
 	router := handlers.InitRouter()
 	err := router.Run(cfg.App.Port)

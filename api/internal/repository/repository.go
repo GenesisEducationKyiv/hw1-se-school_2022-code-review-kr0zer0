@@ -2,29 +2,14 @@ package repository
 
 import (
 	"api/config"
+	"api/internal/service"
 
 	"github.com/mailjet/mailjet-apiv3-go"
 )
 
-//go:generate mockgen -source=repository.go -destination=mocks/mock.go
-
-type EmailSubscription interface {
-	Add(email string) error
-	GetAll() ([]string, error)
-}
-
-type EmailSending interface {
-	SendToList(emails []string, message string) error
-}
-
-type Repository struct {
-	EmailSubscription
-	EmailSending
-}
-
-func NewRepository(filepath string, cfg *config.Config, mailjetClient *mailjet.Client) *Repository {
-	return &Repository{
-		EmailSubscription: NewEmailSubscriptionRepository(filepath),
-		EmailSending:      NewEmailSendingRepository(cfg, mailjetClient),
+func NewRepository(filepath string, cfg *config.Config, mailjetClient *mailjet.Client) *service.Repository {
+	return &service.Repository{
+		EmailSubscriptionRepo: NewEmailSubscriptionRepository(filepath),
+		EmailSendingRepo:      NewEmailSendingRepository(cfg, mailjetClient),
 	}
 }

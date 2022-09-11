@@ -1,16 +1,30 @@
 package handler
 
 import (
-	"api/internal/service"
-
 	"github.com/gin-gonic/gin"
 )
 
-type HTTPHandler struct {
-	services *service.Service
+//go:generate mockgen -source=router.go -destination=mocks/serviceMock.go
+
+type CryptoService interface {
+	GetBtcUahRate() (float64, error)
 }
 
-func NewHandler(services *service.Service) *HTTPHandler {
+type EmailSubService interface {
+	SendToAll() error
+	Subscribe(email string) error
+}
+
+type Service struct {
+	CryptoService
+	EmailSubService
+}
+
+type HTTPHandler struct {
+	services *Service
+}
+
+func NewHandler(services *Service) *HTTPHandler {
 	return &HTTPHandler{
 		services: services,
 	}
