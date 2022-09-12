@@ -64,7 +64,8 @@ func (s *IntegrationTestSuite) initDeps() {
 	s.emailSendingMock = mock_service.NewMockEmailSendingRepo(mockController)
 
 	s.cfg = config.GetConfig()
-	s.cryptoProvider = service.NewCoinMarketCapProvider(s.cfg)
+	cryptoProviderCreator := service.NewCoinMarketCapProviderCreator(s.cfg)
+	s.cryptoProvider = cryptoProviderCreator.CreateCryptoProvider()
 	s.repos = &service.Repository{
 		EmailSubscriptionRepo: repository.NewEmailSubscriptionRepository(TestDataPath),
 		EmailSendingRepo:      s.emailSendingMock,

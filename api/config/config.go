@@ -12,11 +12,17 @@ type Config struct {
 	App struct {
 		Port string `env-required:"true" yaml:"port"`
 	} `yaml:"app"`
-	CryptoAPI struct {
-		URL        string `env-required:"true" yaml:"url"`
-		HeaderName string `env-required:"true" yaml:"headerName"`
-		APIKey     string `env-required:"true" env:"COINMARKETCAP_API_KEY"`
-	} `yaml:"cryptoApi"`
+	CryptoProviders struct {
+		CryptoProvider string `env-required:"true" env:"CRYPTO_CURRENCY_PROVIDER"`
+		CoinMarketCap  struct {
+			URL        string `env-required:"true" yaml:"url"`
+			HeaderName string `env-required:"true" yaml:"headerName"`
+			APIKey     string `env-required:"true" env:"COINMARKETCAP_API_KEY"`
+		} `yaml:"coinMarketCap"`
+		Binance struct {
+			URL string `env-required:"true" yaml:"url"`
+		} `yaml:"binance"`
+	} `yaml:"cryptoProviders"`
 	EmailSending struct {
 		SenderAddress string `env-required:"true" yaml:"senderAddress"`
 		PublicKey     string `env-required:"true" env:"MAILJET_PUBLIC_KEY"`
