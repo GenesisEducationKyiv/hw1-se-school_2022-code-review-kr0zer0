@@ -24,10 +24,10 @@ func Run() error {
 	coinAPIProvider := coinAPIProviderCreator.CreateCryptoProvider()
 	coinbaseProvider := coinbaseProviderCreator.CreateCryptoProvider()
 
-	coinMarketCapChain := service.NewBaseCryptoChain(coinMarketCapProvider)
-	binanceChain := service.NewBaseCryptoChain(binanceProvider)
-	coinAPIChain := service.NewBaseCryptoChain(coinAPIProvider)
-	coinbaseChain := service.NewBaseCryptoChain(coinbaseProvider)
+	coinMarketCapChain := service.NewBaseCryptoChain(crypto_providers.NewLoggingCryptoProvider(coinMarketCapProvider))
+	binanceChain := service.NewBaseCryptoChain(crypto_providers.NewLoggingCryptoProvider(binanceProvider))
+	coinAPIChain := service.NewBaseCryptoChain(crypto_providers.NewLoggingCryptoProvider(coinAPIProvider))
+	coinbaseChain := service.NewBaseCryptoChain(crypto_providers.NewLoggingCryptoProvider(coinbaseProvider))
 
 	coinMarketCapChain.SetNext(binanceChain)
 	binanceChain.SetNext(coinAPIChain)

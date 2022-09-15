@@ -47,12 +47,6 @@ func (p *CoinbaseProvider) GetExchangeRate(baseCurrency, quoteCurrency string) (
 		return -1, err
 	}
 
-	//queryString := "data.amount"
-	//price, ok := ask.For(mappedResponse, queryString).Float(-1)
-	//if !ok {
-	//	return price, fmt.Errorf("error when parsing JSON %v", mappedResponse)
-	//}
-
 	price, err := strconv.ParseFloat(mappedResponse.Data.Amount, 64)
 	if err != nil {
 		return -1, fmt.Errorf("can't parse %v to float", price)
