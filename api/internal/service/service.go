@@ -1,6 +1,7 @@
 package service
 
 import (
+	"api/config"
 	"api/internal/handler"
 )
 
@@ -20,8 +21,8 @@ type Repository struct {
 	EmailSendingRepo
 }
 
-func NewService(repositories *Repository, cryptoProvider CryptoProvider) *handler.Service {
-	crypto := NewCryptoService(cryptoProvider)
+func NewService(repositories *Repository, cryptoChain CryptoChain, cfg *config.Config) *handler.Service {
+	crypto := NewCachedCryptoService(NewCryptoService(cryptoChain), cfg.Cache.RateCacheTTL)
 	return &handler.Service{
 		CryptoService: crypto,
 		EmailSubService: NewEmailSubscriptionService(

@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -22,6 +23,14 @@ type Config struct {
 		Binance struct {
 			URL string `env-required:"true" yaml:"url"`
 		} `yaml:"binance"`
+		CoinAPI struct {
+			URL        string `env-required:"true" yaml:"url"`
+			HeaderName string `env-required:"true" yaml:"headerName"`
+			APIKey     string `env-required:"true" env:"X-CoinAPI-Key"`
+		} `yaml:"coinAPI"`
+		Coinbase struct {
+			URL string `env-required:"true" yaml:"url"`
+		} `yaml:"coinbase"`
 	} `yaml:"cryptoProviders"`
 	EmailSending struct {
 		SenderAddress string `env-required:"true" yaml:"senderAddress"`
@@ -31,6 +40,9 @@ type Config struct {
 	Database struct {
 		FilePath string `env-required:"true" yaml:"filePath"`
 	} `yaml:"database"`
+	Cache struct {
+		RateCacheTTL time.Duration `env-required:"true" yaml:"rateCacheTTL"`
+	} `yaml:"cache"`
 }
 
 func GetConfig() *Config {

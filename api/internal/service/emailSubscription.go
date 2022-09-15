@@ -1,19 +1,20 @@
 package service
 
 import (
+	"api/internal/handler"
 	"fmt"
 )
 
 type EmailSubscriptionService struct {
 	emailSubsRepo    EmailSubscriptionRepo
 	emailSendingRepo EmailSendingRepo
-	cryptoService    *CryptoService
+	cryptoService    handler.CryptoService
 }
 
 func NewEmailSubscriptionService(
 	emailSubsRepo EmailSubscriptionRepo,
 	emailSendingRepo EmailSendingRepo,
-	cryptoService *CryptoService) *EmailSubscriptionService {
+	cryptoService handler.CryptoService) *EmailSubscriptionService {
 	return &EmailSubscriptionService{
 		emailSubsRepo:    emailSubsRepo,
 		emailSendingRepo: emailSendingRepo,

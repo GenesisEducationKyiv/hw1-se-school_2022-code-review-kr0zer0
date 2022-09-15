@@ -5,6 +5,7 @@ import (
 	"api/internal/handler"
 	"api/internal/repository"
 	"api/internal/service"
+	"api/internal/service/cryptoProviders"
 
 	"github.com/mailjet/mailjet-apiv3-go"
 )
@@ -13,18 +14,27 @@ func Run() error {
 	cfg := config.GetConfig()
 	mailjetClient := mailjet.NewMailjetClient(cfg.EmailSending.PublicKey, cfg.EmailSending.PrivateKey)
 
-	var cryptoProviderCreator service.CryptoProviderCreator
-	switch cfg.CryptoProviders.CryptoProvider {
-	case "Binance":
-		cryptoProviderCreator = service.NewBinanceProviderCreator(cfg)
-	case "CoinMarketCap":
-		cryptoProviderCreator = service.NewCoinMarketCapProviderCreator(cfg)
-	}
+	coinMarketCapProviderCreator := crypto_providers.NewCoinMarketCapProviderCreator(cfg)
+	binanceProviderCreator := crypto_providers.NewBinanceProviderCreator(cfg)
+	coinAPIProviderCreator := crypto_providers.NewCoinAPIProviderCreator(cfg)
+	coinbaseProviderCreator := crypto_providers.NewCoinbaseProviderCreator(cfg)
 
-	cryptoProvider := cryptoProviderCreator.CreateCryptoProvider()
+	coinMarketCapProvider := coinMarketCapProviderCreator.CreateCryptoProvider()
+	binanceProvider := binanceProviderCreator.CreateCryptoProvider()
+	coinAPIProvider := coinAPIProviderCreator.CreateCryptoProvider()
+	coinbaseProvider := coinbaseProviderCreator.CreateCryptoProvider()
+
+	coinMarketCapChain := service.NewBaseCryptoChain(coinMarketCapProvider)
+	binanceChain := service.NewBaseCryptoChain(binanceProvider)
+	coinAPIChain := service.NewBaseCryptoChain(coinAPIProvider)
+	coinbaseChain := service.NewBaseCryptoChain(coinbaseProvider)
+
+	coinMarketCapChain.SetNext(binanceChain)
+	binanceChain.SetNext(coinAPIChain)
+	coinAPIChain.SetNext(coinbaseChain)
 
 	repos := repository.NewRepository(cfg.Database.FilePath, cfg, mailjetClient)
-	services := service.NewService(repos, cryptoProvider)
+	services := service.NewService(repos, coinMarketCapChain, cfg)
 	handlers := handler.NewHandler(services)
 	router := handlers.InitRouter()
 	err := router.Run(cfg.App.Port)
