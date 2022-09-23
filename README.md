@@ -12,6 +12,9 @@
    ```
 
 ## Архітектура проекту
+
+![Architecture](https://drive.google.com/file/d/1DaEDnkuUf2x0Q1IiRUYFrCsVF5KbkCqr/view?usp=sharing)
+
 ### Код написаний за правилами чистої архітектури, що має наступні переваги:
 - Такі системи легко розширюються
 - Такий код легше тестувати
