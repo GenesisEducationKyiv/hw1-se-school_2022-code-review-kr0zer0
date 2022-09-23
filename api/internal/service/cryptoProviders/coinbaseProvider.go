@@ -2,7 +2,6 @@ package crypto_providers
 
 import (
 	"api/config"
-	"api/internal/service"
 	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
@@ -23,7 +22,7 @@ func NewCoinbaseProviderCreator(cfg *config.Config) *CoinbaseProviderCreator {
 	return &CoinbaseProviderCreator{cfg: cfg}
 }
 
-func (c *CoinbaseProviderCreator) CreateCryptoProvider() service.CryptoProvider {
+func (c *CoinbaseProviderCreator) CreateCryptoProvider() *CoinbaseProvider {
 	return &CoinbaseProvider{
 		APIUrl: c.cfg.CryptoProviders.Coinbase.URL,
 	}

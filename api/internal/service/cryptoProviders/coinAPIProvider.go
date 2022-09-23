@@ -2,7 +2,6 @@ package crypto_providers
 
 import (
 	"api/config"
-	"api/internal/service"
 	"encoding/json"
 	"github.com/go-resty/resty/v2"
 )
@@ -23,7 +22,7 @@ func NewCoinAPIProviderCreator(cfg *config.Config) *CoinAPIProviderCreator {
 	return &CoinAPIProviderCreator{cfg: cfg}
 }
 
-func (c *CoinAPIProviderCreator) CreateCryptoProvider() service.CryptoProvider {
+func (c *CoinAPIProviderCreator) CreateCryptoProvider() *CoinAPIProvider {
 	return &CoinAPIProvider{
 		HeaderName: c.cfg.CryptoProviders.CoinAPI.HeaderName,
 		APIKey:     c.cfg.CryptoProviders.CoinAPI.APIKey,
