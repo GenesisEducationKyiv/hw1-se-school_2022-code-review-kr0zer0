@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -12,11 +13,25 @@ type Config struct {
 	App struct {
 		Port string `env-required:"true" yaml:"port"`
 	} `yaml:"app"`
-	CryptoAPI struct {
-		URL        string `env-required:"true" yaml:"url"`
-		HeaderName string `env-required:"true" yaml:"headerName"`
-		APIKey     string `env-required:"true" env:"COINMARKETCAP_API_KEY"`
-	} `yaml:"cryptoApi"`
+	CryptoProviders struct {
+		CryptoProvider string `env-required:"true" env:"CRYPTO_CURRENCY_PROVIDER"`
+		CoinMarketCap  struct {
+			URL        string `env-required:"true" yaml:"url"`
+			HeaderName string `env-required:"true" yaml:"headerName"`
+			APIKey     string `env-required:"true" env:"COINMARKETCAP_API_KEY"`
+		} `yaml:"coinMarketCap"`
+		Binance struct {
+			URL string `env-required:"true" yaml:"url"`
+		} `yaml:"binance"`
+		CoinAPI struct {
+			URL        string `env-required:"true" yaml:"url"`
+			HeaderName string `env-required:"true" yaml:"headerName"`
+			APIKey     string `env-required:"true" env:"X-CoinAPI-Key"`
+		} `yaml:"coinAPI"`
+		Coinbase struct {
+			URL string `env-required:"true" yaml:"url"`
+		} `yaml:"coinbase"`
+	} `yaml:"cryptoProviders"`
 	EmailSending struct {
 		SenderAddress string `env-required:"true" yaml:"senderAddress"`
 		PublicKey     string `env-required:"true" env:"MAILJET_PUBLIC_KEY"`
@@ -25,6 +40,9 @@ type Config struct {
 	Database struct {
 		FilePath string `env-required:"true" yaml:"filePath"`
 	} `yaml:"database"`
+	Cache struct {
+		RateCacheTTL time.Duration `env-required:"true" yaml:"rateCacheTTL"`
+	} `yaml:"cache"`
 }
 
 func GetConfig() *Config {

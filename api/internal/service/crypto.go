@@ -1,74 +1,61 @@
 package service
 
 import (
-	"api/config"
-	"encoding/json"
-	"errors"
-	"fmt"
-
-	"github.com/go-resty/resty/v2"
-	"github.com/simonnilsson/ask"
+	"github.com/jellydator/ttlcache/v3"
+	"time"
 )
 
-type CryptoService struct {
-	cryptoProvider CryptoProvider
+type (
+	CachedCryptoService struct {
+		cryptoService *CryptoService
+		rateCache     *ttlcache.Cache[string, float64]
+		cacheTTL      time.Duration
+	}
+
+	CryptoService struct {
+		cryptoChain CryptoChain
+	}
+
+	CryptoProvider interface {
+		GetExchangeRate(baseCurrency, quoteCurrency string) (float64, error)
+	}
+
+	CryptoProviderCreator interface {
+		CreateCryptoProvider() CryptoProvider
+	}
+)
+
+func NewCachedCryptoService(cryptoService *CryptoService, cacheTTL time.Duration) *CachedCryptoService {
+	rateCache := ttlcache.New[string, float64]()
+	return &CachedCryptoService{
+		cryptoService: cryptoService,
+		rateCache:     rateCache,
+		cacheTTL:      cacheTTL,
+	}
 }
 
-func NewCryptoService(cryptoProvider CryptoProvider) *CryptoService {
+func NewCryptoService(cryptoChain CryptoChain) *CryptoService {
 	return &CryptoService{
-		cryptoProvider: cryptoProvider,
+		cryptoChain: cryptoChain,
 	}
 }
 
 func (s *CryptoService) GetBtcUahRate() (float64, error) {
-	return s.cryptoProvider.GetExchangeRate("BTC", "UAH")
+	return s.cryptoChain.HandleExchangeRate("BTC", "UAH")
 }
 
-type CryptoProvider interface {
-	GetExchangeRate(baseCurrency, quoteCurrency string) (float64, error)
-}
-
-type CoinMarketCapProvider struct {
-	cfg *config.Config
-}
-
-func NewCoinMarketCapProvider(cfg *config.Config) *CoinMarketCapProvider {
-	return &CoinMarketCapProvider{cfg: cfg}
-}
-
-func (p *CoinMarketCapProvider) makeAPIRequest(baseCurrency, quoteCurrency string) ([]byte, error) {
-	client := resty.New()
-	response, err := client.R().
-		SetQueryParams(map[string]string{
-			"symbol":  baseCurrency,
-			"convert": quoteCurrency,
-		}).
-		SetHeader(p.cfg.CryptoAPI.HeaderName, p.cfg.CryptoAPI.APIKey).
-		Get(p.cfg.CryptoAPI.URL)
-	if err != nil {
-		return nil, err
+func (c *CachedCryptoService) GetBtcUahRate() (float64, error) {
+	cachedItem := c.rateCache.Get("rate", ttlcache.WithDisableTouchOnHit[string, float64]())
+	if cachedItem != nil && !cachedItem.IsExpired() {
+		return cachedItem.Value(), nil
 	}
 
-	return response.Body(), nil
-}
-
-func (p *CoinMarketCapProvider) GetExchangeRate(baseCurrency, quoteCurrency string) (float64, error) {
-	response, err := p.makeAPIRequest(baseCurrency, quoteCurrency)
+	rate, err := c.cryptoService.GetBtcUahRate()
 	if err != nil {
 		return -1, err
 	}
 
-	var mappedResponse map[string]interface{}
-	err = json.Unmarshal(response, &mappedResponse)
-	if err != nil {
-		return -1, err
-	}
+	c.rateCache.Set("rate", rate, c.cacheTTL)
 
-	queryString := fmt.Sprintf("data.%s[0].quote.%s.price", baseCurrency, quoteCurrency)
-	price, ok := ask.For(mappedResponse, queryString).Float(-1)
-	if !ok {
-		return price, errors.New("incorrect path when parsing JSON")
-	}
-
-	return price, nil
+	return rate, nil
 }

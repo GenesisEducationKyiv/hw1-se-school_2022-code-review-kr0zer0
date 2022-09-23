@@ -6,6 +6,7 @@ import (
 	"api/internal/handler"
 	"api/internal/repository"
 	"api/internal/service"
+	"api/internal/service/cryptoProviders"
 	mock_service "api/internal/service/mocks"
 	"os"
 	"testing"
@@ -20,11 +21,11 @@ const TestDataPath = "../data/data.json"
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	cfg            *config.Config
-	cryptoProvider service.CryptoProvider
-	handler        *handler.HTTPHandler
-	services       *handler.Service
-	repos          *service.Repository
+	cfg         *config.Config
+	cryptoChain service.CryptoChain
+	handler     *handler.HTTPHandler
+	services    *handler.Service
+	repos       *service.Repository
 
 	emailSendingMock *mock_service.MockEmailSendingRepo
 }
@@ -64,11 +65,30 @@ func (s *IntegrationTestSuite) initDeps() {
 	s.emailSendingMock = mock_service.NewMockEmailSendingRepo(mockController)
 
 	s.cfg = config.GetConfig()
-	s.cryptoProvider = service.NewCoinMarketCapProvider(s.cfg)
+	coinMarketCapProviderCreator := crypto_providers.NewCoinMarketCapProviderCreator(s.cfg)
+	binanceProviderCreator := crypto_providers.NewBinanceProviderCreator(s.cfg)
+	coinAPIProviderCreator := crypto_providers.NewCoinAPIProviderCreator(s.cfg)
+	coinbaseProviderCreator := crypto_providers.NewCoinbaseProviderCreator(s.cfg)
+
+	coinMarketCapProvider := coinMarketCapProviderCreator.CreateCryptoProvider()
+	binanceProvider := binanceProviderCreator.CreateCryptoProvider()
+	coinAPIProvider := coinAPIProviderCreator.CreateCryptoProvider()
+	coinbaseProvider := coinbaseProviderCreator.CreateCryptoProvider()
+
+	coinMarketCapChain := service.NewBaseCryptoChain(coinMarketCapProvider)
+	binanceChain := service.NewBaseCryptoChain(binanceProvider)
+	coinAPIChain := service.NewBaseCryptoChain(coinAPIProvider)
+	coinbaseChain := service.NewBaseCryptoChain(coinbaseProvider)
+
+	coinMarketCapChain.SetNext(binanceChain)
+	binanceChain.SetNext(coinAPIChain)
+	coinAPIChain.SetNext(coinbaseChain)
+
+	s.cryptoChain = coinMarketCapChain
 	s.repos = &service.Repository{
 		EmailSubscriptionRepo: repository.NewEmailSubscriptionRepository(TestDataPath),
 		EmailSendingRepo:      s.emailSendingMock,
 	}
-	s.services = service.NewService(s.repos, s.cryptoProvider)
+	s.services = service.NewService(s.repos, s.cryptoChain, s.cfg)
 	s.handler = handler.NewHandler(s.services)
 }
