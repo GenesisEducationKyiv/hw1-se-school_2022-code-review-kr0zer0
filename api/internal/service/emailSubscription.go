@@ -1,24 +1,23 @@
 package service
 
 import (
-	"api/internal/handler"
 	"fmt"
 )
 
 type EmailSubscriptionService struct {
-	emailSubsRepo    EmailSubscriptionRepo
-	emailSendingRepo EmailSendingRepo
-	cryptoService    handler.CryptoService
+	emailSubsRepo EmailSubscriptionRepo
+	mailer        Mailer
+	cryptoService Crypto
 }
 
 func NewEmailSubscriptionService(
 	emailSubsRepo EmailSubscriptionRepo,
-	emailSendingRepo EmailSendingRepo,
-	cryptoService handler.CryptoService) *EmailSubscriptionService {
+	mailer Mailer,
+	cryptoService Crypto) *EmailSubscriptionService {
 	return &EmailSubscriptionService{
-		emailSubsRepo:    emailSubsRepo,
-		emailSendingRepo: emailSendingRepo,
-		cryptoService:    cryptoService,
+		emailSubsRepo: emailSubsRepo,
+		mailer:        mailer,
+		cryptoService: cryptoService,
 	}
 }
 
@@ -42,7 +41,7 @@ func (s *EmailSubscriptionService) SendToAll() error {
 		return err
 	}
 
-	err = s.emailSendingRepo.SendToList(emails, fmt.Sprintf("%.2fUAH", rate))
+	err = s.mailer.SendToList(emails, fmt.Sprintf("%.2fUAH", rate))
 	if err != nil {
 		return err
 	}

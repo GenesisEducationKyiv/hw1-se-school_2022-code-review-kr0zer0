@@ -1,4 +1,4 @@
-package repository
+package mailers
 
 import (
 	"api/config"
@@ -7,19 +7,19 @@ import (
 	"github.com/mailjet/mailjet-apiv3-go"
 )
 
-type EmailSendingRepository struct {
+type MailjetMailer struct {
 	cfg           *config.Config
 	mailjetClient *mailjet.Client
 }
 
-func NewEmailSendingRepository(cfg *config.Config, mailjetClient *mailjet.Client) *EmailSendingRepository {
-	return &EmailSendingRepository{
+func NewMailjetMailer(cfg *config.Config, mailjetClient *mailjet.Client) *MailjetMailer {
+	return &MailjetMailer{
 		cfg:           cfg,
 		mailjetClient: mailjetClient,
 	}
 }
 
-func (r *EmailSendingRepository) SendToList(emails []string, message string) error {
+func (r *MailjetMailer) SendToList(emails []string, message string) error {
 	if len(emails) == 0 {
 		return nil
 	}
@@ -38,7 +38,7 @@ func (r *EmailSendingRepository) SendToList(emails []string, message string) err
 	return nil
 }
 
-func (r *EmailSendingRepository) FormSendingList(emails []string, message string) []mailjet.InfoSendMail {
+func (r *MailjetMailer) FormSendingList(emails []string, message string) []mailjet.InfoSendMail {
 	var sendingList []mailjet.InfoSendMail
 	for _, email := range emails {
 		info := mailjet.InfoSendMail{

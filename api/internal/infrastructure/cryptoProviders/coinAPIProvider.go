@@ -2,6 +2,7 @@ package crypto_providers
 
 import (
 	"api/config"
+	"api/internal/entities"
 	"encoding/json"
 	"github.com/go-resty/resty/v2"
 )
@@ -34,8 +35,8 @@ type coinAPIResponse struct {
 	Rate float64 `json:"rate"`
 }
 
-func (p *CoinAPIProvider) GetExchangeRate(baseCurrency, quoteCurrency string) (float64, error) {
-	response, err := p.makeAPIRequest(baseCurrency, quoteCurrency)
+func (p *CoinAPIProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (float64, error) {
+	response, err := p.makeAPIRequest(string(currencyPair.Base), string(currencyPair.Quote))
 	if err != nil {
 		return -1, err
 	}

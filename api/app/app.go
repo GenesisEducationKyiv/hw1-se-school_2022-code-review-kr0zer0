@@ -2,17 +2,18 @@ package app
 
 import (
 	"api/config"
-	"api/internal/handler"
-	"api/internal/repository"
+	"api/internal/controllers/http"
+	"api/internal/infrastructure/cryptoProviders"
+	"api/internal/infrastructure/mailers"
+	"api/internal/infrastructure/repository/file"
 	"api/internal/service"
-	"api/internal/service/cryptoProviders"
-
 	"github.com/mailjet/mailjet-apiv3-go"
 )
 
 func Run() error {
 	cfg := config.GetConfig()
 	mailjetClient := mailjet.NewMailjetClient(cfg.EmailSending.PublicKey, cfg.EmailSending.PrivateKey)
+	mailer := mailers.NewMailjetMailer(cfg, mailjetClient)
 
 	coinMarketCapProviderCreator := crypto_providers.NewCoinMarketCapProviderCreator(cfg)
 	binanceProviderCreator := crypto_providers.NewBinanceProviderCreator(cfg)
@@ -24,18 +25,18 @@ func Run() error {
 	coinAPIProvider := coinAPIProviderCreator.CreateCryptoProvider()
 	coinbaseProvider := coinbaseProviderCreator.CreateCryptoProvider()
 
-	coinMarketCapChain := service.NewBaseCryptoChain(crypto_providers.NewLoggingCryptoProvider(coinMarketCapProvider))
-	binanceChain := service.NewBaseCryptoChain(crypto_providers.NewLoggingCryptoProvider(binanceProvider))
-	coinAPIChain := service.NewBaseCryptoChain(crypto_providers.NewLoggingCryptoProvider(coinAPIProvider))
-	coinbaseChain := service.NewBaseCryptoChain(crypto_providers.NewLoggingCryptoProvider(coinbaseProvider))
+	coinMarketCapChain := service.NewBaseCryptoChain(service.NewLoggingCryptoProvider(coinMarketCapProvider))
+	binanceChain := service.NewBaseCryptoChain(service.NewLoggingCryptoProvider(binanceProvider))
+	coinAPIChain := service.NewBaseCryptoChain(service.NewLoggingCryptoProvider(coinAPIProvider))
+	coinbaseChain := service.NewBaseCryptoChain(service.NewLoggingCryptoProvider(coinbaseProvider))
 
 	coinMarketCapChain.SetNext(binanceChain)
 	binanceChain.SetNext(coinAPIChain)
 	coinAPIChain.SetNext(coinbaseChain)
 
-	repos := repository.NewRepository(cfg.Database.FilePath, cfg, mailjetClient)
-	services := service.NewService(repos, coinMarketCapChain, cfg)
-	handlers := handler.NewHandler(services)
+	repos := file.NewRepository(cfg.Database.FilePath)
+	services := service.NewService(repos, coinMarketCapChain, mailer, cfg)
+	handlers := http.NewHandler(services)
 	router := handlers.InitRouter()
 	err := router.Run(cfg.App.Port)
 	if err != nil {

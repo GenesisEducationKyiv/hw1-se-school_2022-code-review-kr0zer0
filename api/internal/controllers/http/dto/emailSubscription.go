@@ -1,5 +1,5 @@
-package inputs
+package dto
 
-type Subscribing struct {
+type SubscribeEmail struct {
 	Email string `form:"email" binding:"required"`
 }

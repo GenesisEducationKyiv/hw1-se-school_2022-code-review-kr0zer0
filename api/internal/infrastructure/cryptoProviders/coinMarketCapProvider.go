@@ -2,6 +2,7 @@ package crypto_providers
 
 import (
 	"api/config"
+	"api/internal/entities"
 	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
@@ -32,8 +33,8 @@ func (c *CoinMarketCapProviderCreator) CreateCryptoProvider() *CoinMarketCapProv
 	}
 }
 
-func (p *CoinMarketCapProvider) GetExchangeRate(baseCurrency, quoteCurrency string) (float64, error) {
-	response, err := p.makeAPIRequest(baseCurrency, quoteCurrency)
+func (p *CoinMarketCapProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (float64, error) {
+	response, err := p.makeAPIRequest(string(currencyPair.Base), string(currencyPair.Quote))
 	if err != nil {
 		return -1, err
 	}
@@ -44,7 +45,7 @@ func (p *CoinMarketCapProvider) GetExchangeRate(baseCurrency, quoteCurrency stri
 		return -1, err
 	}
 
-	queryString := fmt.Sprintf("data.%s[0].quote.%s.price", baseCurrency, quoteCurrency)
+	queryString := fmt.Sprintf("data.%s[0].quote.%s.price", currencyPair.Base, currencyPair.Quote)
 	price, ok := ask.For(mappedResponse, queryString).Float(-1)
 	if !ok {
 		return price, fmt.Errorf("error when parsing JSON %v", mappedResponse)

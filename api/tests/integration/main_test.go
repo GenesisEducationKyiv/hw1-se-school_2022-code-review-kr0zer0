@@ -3,10 +3,10 @@ package integration
 import (
 	"api/config"
 	"api/internal/constants"
-	"api/internal/handler"
-	"api/internal/repository"
+	"api/internal/controllers/http"
+	"api/internal/infrastructure/cryptoProviders"
+	"api/internal/infrastructure/repository/file"
 	"api/internal/service"
-	"api/internal/service/cryptoProviders"
 	mock_service "api/internal/service/mocks"
 	"os"
 	"testing"
@@ -23,11 +23,11 @@ type IntegrationTestSuite struct {
 
 	cfg         *config.Config
 	cryptoChain service.CryptoChain
-	handler     *handler.HTTPHandler
-	services    *handler.Service
+	handler     *http.Handler
+	services    *service.Service
 	repos       *service.Repository
 
-	emailSendingMock *mock_service.MockEmailSendingRepo
+	mailerMock *mock_service.MockMailer
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -62,7 +62,7 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 
 func (s *IntegrationTestSuite) initDeps() {
 	mockController := gomock.NewController(s.T())
-	s.emailSendingMock = mock_service.NewMockEmailSendingRepo(mockController)
+	s.mailerMock = mock_service.NewMockMailer(mockController)
 
 	s.cfg = config.GetConfig()
 	coinMarketCapProviderCreator := crypto_providers.NewCoinMarketCapProviderCreator(s.cfg)
@@ -86,9 +86,8 @@ func (s *IntegrationTestSuite) initDeps() {
 
 	s.cryptoChain = coinMarketCapChain
 	s.repos = &service.Repository{
-		EmailSubscriptionRepo: repository.NewEmailSubscriptionRepository(TestDataPath),
-		EmailSendingRepo:      s.emailSendingMock,
+		EmailSubscriptionRepo: file.NewEmailSubscriptionRepository(TestDataPath),
 	}
-	s.services = service.NewService(s.repos, s.cryptoChain, s.cfg)
-	s.handler = handler.NewHandler(s.services)
+	s.services = service.NewService(s.repos, s.cryptoChain, s.mailerMock, s.cfg)
+	s.handler = http.NewHandler(s.services)
 }

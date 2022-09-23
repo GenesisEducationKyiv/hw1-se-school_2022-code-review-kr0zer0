@@ -49,7 +49,7 @@ func (s *IntegrationTestSuite) TestSubscribe_Duplicate() {
 }
 
 func (s *IntegrationTestSuite) TestSendEmails() {
-	s.emailSendingMock.EXPECT().SendToList([]string{}, gomock.Any()).Return(nil)
+	s.mailerMock.EXPECT().SendToList([]string{}, gomock.Any()).Return(nil)
 
 	router := s.handler.InitRouter()
 

@@ -1,4 +1,4 @@
-package handler
+package response
 
 import (
 	"log"
@@ -10,11 +10,11 @@ type errorResponse struct {
 	Message string `json:"message"`
 }
 
-func newErrorResponse(c *gin.Context, statusCode int, message string) {
+func NewErrorResponse(c *gin.Context, statusCode int, message string) {
 	log.Println(message)
 	c.AbortWithStatusJSON(statusCode, errorResponse{message})
 }
 
-type statusResponse struct {
+type StatusResponse struct {
 	Status string `json:"status"`
 }

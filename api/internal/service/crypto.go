@@ -1,6 +1,7 @@
 package service
 
 import (
+	"api/internal/entities"
 	"github.com/jellydator/ttlcache/v3"
 	"time"
 )
@@ -16,12 +17,12 @@ type (
 		cryptoChain CryptoChain
 	}
 
-	CryptoProvider interface {
-		GetExchangeRate(baseCurrency, quoteCurrency string) (float64, error)
+	Provider interface {
+		GetExchangeRate(currencyPair entities.CurrencyPair) (float64, error)
 	}
 
-	CryptoProviderCreator interface {
-		CreateCryptoProvider() CryptoProvider
+	ProviderCreator interface {
+		CreateCryptoProvider() Provider
 	}
 )
 
@@ -41,7 +42,8 @@ func NewCryptoService(cryptoChain CryptoChain) *CryptoService {
 }
 
 func (s *CryptoService) GetBtcUahRate() (float64, error) {
-	return s.cryptoChain.HandleExchangeRate("BTC", "UAH")
+	pair := entities.NewCurrencyPair(entities.BTC, entities.UAH)
+	return s.cryptoChain.HandleExchangeRate(pair)
 }
 
 func (c *CachedCryptoService) GetBtcUahRate() (float64, error) {

@@ -1,8 +1,9 @@
-package handler
+package http
 
 import (
+	mock_handler "api/internal/controllers/mocks"
 	"api/internal/customerrors"
-	mock_handler "api/internal/handler/mocks"
+	"api/internal/service"
 	"bytes"
 	"errors"
 	"fmt"
@@ -51,7 +52,7 @@ func TestHTTPHandler_sendMails(t *testing.T) {
 			emailSubMock := mock_handler.NewMockEmailSubService(mockController)
 			testCase.mockBehavior(emailSubMock)
 
-			services := &Service{EmailSubService: emailSubMock}
+			services := &service.Service{EmailSub: emailSubMock}
 			handler := NewHandler(services)
 
 			r := gin.New()
@@ -123,7 +124,7 @@ func TestHTTPHandler_subscribe(t *testing.T) {
 			emailSubMock := mock_handler.NewMockEmailSubService(mockController)
 			testCase.mockBehavior(emailSubMock, testCase.emailInput)
 
-			services := &Service{EmailSubService: emailSubMock}
+			services := &service.Service{EmailSub: emailSubMock}
 			handler := NewHandler(services)
 
 			r := gin.New()

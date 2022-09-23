@@ -1,7 +1,8 @@
-package handler
+package http
 
 import (
-	mock_handler "api/internal/handler/mocks"
+	mock_handler "api/internal/controllers/mocks"
+	"api/internal/service"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -48,7 +49,7 @@ func TestHTTPHandler_getCurrentExchangeRate(t *testing.T) {
 			cryptoServiceMock := mock_handler.NewMockCryptoService(mockController)
 			testCase.mockBehavior(cryptoServiceMock)
 
-			services := &Service{CryptoService: cryptoServiceMock}
+			services := &service.Service{Crypto: cryptoServiceMock}
 			handler := NewHandler(services)
 
 			r := gin.New()

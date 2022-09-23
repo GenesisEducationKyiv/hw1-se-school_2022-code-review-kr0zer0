@@ -1,16 +1,18 @@
 package service
 
+import "api/internal/entities"
+
 type CryptoChain interface {
 	SetNext(CryptoChain)
-	HandleExchangeRate(baseCurrency, quoteCurrency string) (float64, error)
+	HandleExchangeRate(currencyPair entities.CurrencyPair) (float64, error)
 }
 
 type BaseCryptoChain struct {
 	next     CryptoChain
-	provider CryptoProvider
+	provider Provider
 }
 
-func NewBaseCryptoChain(provider CryptoProvider) CryptoChain {
+func NewBaseCryptoChain(provider Provider) CryptoChain {
 	return &BaseCryptoChain{provider: provider}
 }
 
@@ -18,15 +20,15 @@ func (c *BaseCryptoChain) SetNext(next CryptoChain) {
 	c.next = next
 }
 
-func (c *BaseCryptoChain) HandleExchangeRate(baseCurrency, quoteCurrency string) (float64, error) {
-	rate, err := c.provider.GetExchangeRate(baseCurrency, quoteCurrency)
+func (c *BaseCryptoChain) HandleExchangeRate(currencyPair entities.CurrencyPair) (float64, error) {
+	rate, err := c.provider.GetExchangeRate(currencyPair)
 	if err != nil {
 		nextChain := c.next
 		if nextChain == nil {
 			return -1, err
 		}
 
-		rate, err = nextChain.HandleExchangeRate(baseCurrency, quoteCurrency)
+		rate, err = nextChain.HandleExchangeRate(currencyPair)
 	}
 
 	return rate, err
