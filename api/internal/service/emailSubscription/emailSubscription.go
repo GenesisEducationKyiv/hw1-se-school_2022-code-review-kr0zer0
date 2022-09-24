@@ -1,19 +1,20 @@
-package service
+package emailSubscription
 
 import (
+	"api/internal/service/interfaces"
 	"fmt"
 )
 
 type EmailSubscriptionService struct {
-	emailSubsRepo EmailSubscriptionRepo
-	mailer        Mailer
-	cryptoService Crypto
+	emailSubsRepo interfaces.EmailSubscriptionRepo
+	mailer        interfaces.Mailer
+	cryptoService interfaces.CryptoService
 }
 
 func NewEmailSubscriptionService(
-	emailSubsRepo EmailSubscriptionRepo,
-	mailer Mailer,
-	cryptoService Crypto) *EmailSubscriptionService {
+	emailSubsRepo interfaces.EmailSubscriptionRepo,
+	mailer interfaces.Mailer,
+	cryptoService interfaces.CryptoService) *EmailSubscriptionService {
 	return &EmailSubscriptionService{
 		emailSubsRepo: emailSubsRepo,
 		mailer:        mailer,

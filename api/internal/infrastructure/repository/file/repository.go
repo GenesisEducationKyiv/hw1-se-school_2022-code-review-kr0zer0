@@ -1,11 +1,11 @@
 package file
 
 import (
-	"api/internal/service"
+	"api/internal/service/interfaces"
 )
 
-func NewRepository(filepath string) *service.Repository {
-	return &service.Repository{
+func NewRepository(filepath string) *interfaces.Repository {
+	return &interfaces.Repository{
 		EmailSubscriptionRepo: NewEmailSubscriptionRepository(filepath),
 	}
 }

@@ -7,6 +7,8 @@ import (
 	"api/internal/infrastructure/cryptoProviders"
 	"api/internal/infrastructure/repository/file"
 	"api/internal/service"
+	"api/internal/service/crypto"
+	"api/internal/service/interfaces"
 	mock_service "api/internal/service/mocks"
 	"os"
 	"testing"
@@ -22,10 +24,10 @@ type IntegrationTestSuite struct {
 	suite.Suite
 
 	cfg         *config.Config
-	cryptoChain service.CryptoChain
+	cryptoChain crypto.CryptoChain
 	handler     *http.Handler
-	services    *service.Service
-	repos       *service.Repository
+	services    *interfaces.Service
+	repos       *interfaces.Repository
 
 	mailerMock *mock_service.MockMailer
 }
@@ -75,17 +77,17 @@ func (s *IntegrationTestSuite) initDeps() {
 	coinAPIProvider := coinAPIProviderCreator.CreateCryptoProvider()
 	coinbaseProvider := coinbaseProviderCreator.CreateCryptoProvider()
 
-	coinMarketCapChain := service.NewBaseCryptoChain(coinMarketCapProvider)
-	binanceChain := service.NewBaseCryptoChain(binanceProvider)
-	coinAPIChain := service.NewBaseCryptoChain(coinAPIProvider)
-	coinbaseChain := service.NewBaseCryptoChain(coinbaseProvider)
+	coinMarketCapChain := crypto.NewBaseCryptoChain(coinMarketCapProvider)
+	binanceChain := crypto.NewBaseCryptoChain(binanceProvider)
+	coinAPIChain := crypto.NewBaseCryptoChain(coinAPIProvider)
+	coinbaseChain := crypto.NewBaseCryptoChain(coinbaseProvider)
 
 	coinMarketCapChain.SetNext(binanceChain)
 	binanceChain.SetNext(coinAPIChain)
 	coinAPIChain.SetNext(coinbaseChain)
 
 	s.cryptoChain = coinMarketCapChain
-	s.repos = &service.Repository{
+	s.repos = &interfaces.Repository{
 		EmailSubscriptionRepo: file.NewEmailSubscriptionRepository(TestDataPath),
 	}
 	s.services = service.NewService(s.repos, s.cryptoChain, s.mailerMock, s.cfg)

@@ -1,20 +1,20 @@
-package service
+package interfaces
 
 //go:generate mockgen -source=interfaces.go -destination=mocks/mocks.go
 
 type (
-	Crypto interface {
+	CryptoService interface {
 		GetBtcUahRate() (float64, error)
 	}
 
-	EmailSub interface {
+	EmailSubService interface {
 		SendToAll() error
 		Subscribe(email string) error
 	}
 
 	Service struct {
-		Crypto
-		EmailSub
+		CryptoService
+		EmailSubService
 	}
 )
 

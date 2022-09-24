@@ -7,6 +7,7 @@ import (
 	"api/internal/infrastructure/mailers"
 	"api/internal/infrastructure/repository/file"
 	"api/internal/service"
+	"api/internal/service/crypto"
 	"github.com/mailjet/mailjet-apiv3-go"
 )
 
@@ -25,10 +26,10 @@ func Run() error {
 	coinAPIProvider := coinAPIProviderCreator.CreateCryptoProvider()
 	coinbaseProvider := coinbaseProviderCreator.CreateCryptoProvider()
 
-	coinMarketCapChain := service.NewBaseCryptoChain(service.NewLoggingCryptoProvider(coinMarketCapProvider))
-	binanceChain := service.NewBaseCryptoChain(service.NewLoggingCryptoProvider(binanceProvider))
-	coinAPIChain := service.NewBaseCryptoChain(service.NewLoggingCryptoProvider(coinAPIProvider))
-	coinbaseChain := service.NewBaseCryptoChain(service.NewLoggingCryptoProvider(coinbaseProvider))
+	coinMarketCapChain := crypto.NewBaseCryptoChain(crypto.NewLoggingCryptoProvider(coinMarketCapProvider))
+	binanceChain := crypto.NewBaseCryptoChain(crypto.NewLoggingCryptoProvider(binanceProvider))
+	coinAPIChain := crypto.NewBaseCryptoChain(crypto.NewLoggingCryptoProvider(coinAPIProvider))
+	coinbaseChain := crypto.NewBaseCryptoChain(crypto.NewLoggingCryptoProvider(coinbaseProvider))
 
 	coinMarketCapChain.SetNext(binanceChain)
 	binanceChain.SetNext(coinAPIChain)
