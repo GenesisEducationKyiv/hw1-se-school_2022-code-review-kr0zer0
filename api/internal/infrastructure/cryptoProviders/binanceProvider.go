@@ -35,7 +35,7 @@ type binanceResponse struct {
 }
 
 func (p *BinanceProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (*entities.Rate, error) {
-	response, err := p.makeAPIRequest(string(currencyPair.Base + currencyPair.Quote))
+	response, err := p.makeAPIRequest(string(currencyPair.GetBase() + currencyPair.GetQuote()))
 	if err != nil {
 		return nil, err
 	}

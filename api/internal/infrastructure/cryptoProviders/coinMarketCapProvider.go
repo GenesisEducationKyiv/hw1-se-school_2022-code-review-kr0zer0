@@ -34,7 +34,7 @@ func (c *CoinMarketCapProviderCreator) CreateCryptoProvider() *CoinMarketCapProv
 }
 
 func (p *CoinMarketCapProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (*entities.Rate, error) {
-	response, err := p.makeAPIRequest(string(currencyPair.Base), string(currencyPair.Quote))
+	response, err := p.makeAPIRequest(string(currencyPair.GetBase()), string(currencyPair.GetQuote()))
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (p *CoinMarketCapProvider) GetExchangeRate(currencyPair entities.CurrencyPa
 		return nil, err
 	}
 
-	queryString := fmt.Sprintf("data.%s[0].quote.%s.price", currencyPair.Base, currencyPair.Quote)
+	queryString := fmt.Sprintf("data.%s[0].quote.%s.price", currencyPair.GetBase(), currencyPair.GetQuote())
 	price, ok := ask.For(mappedResponse, queryString).Float(-1)
 	if !ok {
 		return nil, fmt.Errorf("error when parsing JSON %v", mappedResponse)
