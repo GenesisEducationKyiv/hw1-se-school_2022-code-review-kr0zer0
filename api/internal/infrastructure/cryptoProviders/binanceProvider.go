@@ -34,24 +34,24 @@ type binanceResponse struct {
 	Price  string `json:"price"`
 }
 
-func (p *BinanceProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (float64, error) {
+func (p *BinanceProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (*entities.Rate, error) {
 	response, err := p.makeAPIRequest(string(currencyPair.Base + currencyPair.Quote))
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 
 	var mappedResponse binanceResponse
 	err = json.Unmarshal(response, &mappedResponse)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 
 	price, err := strconv.ParseFloat(mappedResponse.Price, 64)
 	if err != nil {
-		return -1, fmt.Errorf("can't parse %v to float", price)
+		return nil, fmt.Errorf("can't parse %v to float", price)
 	}
 
-	return price, nil
+	return entities.NewRate(currencyPair, price), nil
 }
 
 func (p *BinanceProvider) makeAPIRequest(symbol string) ([]byte, error) {

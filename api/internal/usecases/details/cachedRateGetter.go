@@ -1,6 +1,7 @@
 package details
 
 import (
+	"api/internal/entities"
 	"api/internal/usecases"
 	"github.com/jellydator/ttlcache/v3"
 	"time"
@@ -21,18 +22,19 @@ func NewCachedRateGetter(cryptoService *usecases.GetRateUseCase, cacheTTL time.D
 	}
 }
 
-func (c *CachedRateGetter) GetBtcUahRate() (float64, error) {
-	cachedItem := c.rateCache.Get("rate", ttlcache.WithDisableTouchOnHit[string, float64]())
+func (c *CachedRateGetter) GetBtcUahRate() (*entities.Rate, error) {
+	cachedItem := c.rateCache.Get("BTCUAH", ttlcache.WithDisableTouchOnHit[string, float64]())
 	if cachedItem != nil && !cachedItem.IsExpired() {
-		return cachedItem.Value(), nil
+		floatRate := cachedItem.Value()
+		return entities.NewRate(entities.NewCurrencyPair(entities.BTC, entities.UAH), floatRate), nil
 	}
 
 	rate, err := c.getRateUseCase.GetBtcUahRate()
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 
-	c.rateCache.Set("rate", rate, c.cacheTTL)
+	c.rateCache.Set(rate.CurrencyPair.String(), rate.Rate, c.cacheTTL)
 
 	return rate, nil
 }

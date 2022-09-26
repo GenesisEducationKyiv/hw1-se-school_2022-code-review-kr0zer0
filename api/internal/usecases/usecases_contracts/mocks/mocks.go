@@ -35,10 +35,10 @@ func (m *MockGetRateUseCase) EXPECT() *MockGetRateUseCaseMockRecorder {
 }
 
 // GetBtcUahRate mocks base method.
-func (m *MockGetRateUseCase) GetBtcUahRate() (float64, error) {
+func (m *MockGetRateUseCase) GetBtcUahRate() (*entities.Rate, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetBtcUahRate")
-	ret0, _ := ret[0].(float64)
+	ret0, _ := ret[0].(*entities.Rate)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -236,10 +236,10 @@ func (m *MockCryptoProvider) EXPECT() *MockCryptoProviderMockRecorder {
 }
 
 // GetExchangeRate mocks base method.
-func (m *MockCryptoProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (float64, error) {
+func (m *MockCryptoProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (*entities.Rate, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetExchangeRate", currencyPair)
-	ret0, _ := ret[0].(float64)
+	ret0, _ := ret[0].(*entities.Rate)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"api/internal/entities"
 	"api/internal/usecases"
 	mock_usecases_contracts "api/internal/usecases/usecases_contracts/mocks"
 	"errors"
@@ -27,7 +28,7 @@ func TestHTTPHandler_getCurrentExchangeRate(t *testing.T) {
 		{
 			name: "OK",
 			mockBehavior: func(s *mock_usecases_contracts.MockGetRateUseCase) {
-				s.EXPECT().GetBtcUahRate().Return(777.777, nil)
+				s.EXPECT().GetBtcUahRate().Return(entities.NewRate(entities.NewCurrencyPair(entities.BTC, entities.UAH), 777.777), nil)
 			},
 			expectedStatusCode:   http.StatusOK,
 			expectedResponseBody: "777.777",
@@ -35,7 +36,7 @@ func TestHTTPHandler_getCurrentExchangeRate(t *testing.T) {
 		{
 			name: "Error",
 			mockBehavior: func(s *mock_usecases_contracts.MockGetRateUseCase) {
-				s.EXPECT().GetBtcUahRate().Return(float64(0), errors.New("some error"))
+				s.EXPECT().GetBtcUahRate().Return(nil, errors.New("some error"))
 			},
 			expectedStatusCode:   http.StatusBadRequest,
 			expectedResponseBody: `{"message":"some error"}`,

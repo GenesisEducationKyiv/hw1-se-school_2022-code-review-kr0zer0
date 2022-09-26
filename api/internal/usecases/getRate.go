@@ -15,7 +15,7 @@ func NewGetRateUseCase(cryptoProvider usecases_contracts.CryptoProvider) *GetRat
 	}
 }
 
-func (u *GetRateUseCase) GetBtcUahRate() (float64, error) {
+func (u *GetRateUseCase) GetBtcUahRate() (*entities.Rate, error) {
 	pair := entities.NewCurrencyPair(entities.BTC, entities.UAH)
 	return u.cryptoProvider.GetExchangeRate(pair)
 }

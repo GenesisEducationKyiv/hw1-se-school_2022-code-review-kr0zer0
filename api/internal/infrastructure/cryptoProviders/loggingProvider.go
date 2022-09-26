@@ -15,14 +15,14 @@ func NewLoggingCryptoProvider(cryptoProvider usecases_contracts.CryptoProvider) 
 	return &LoggingCryptoProvider{cryptoProvider: cryptoProvider}
 }
 
-func (l *LoggingCryptoProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (float64, error) {
+func (l *LoggingCryptoProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (*entities.Rate, error) {
 	rate, err := l.cryptoProvider.GetExchangeRate(currencyPair)
 	if err != nil {
 		log.Printf("%v - %v", l.getProviderName(), err)
-		return -1, err
+		return nil, err
 	}
 
-	log.Printf("%v - %v", l.getProviderName(), rate)
+	log.Printf("%v - %v", l.getProviderName(), rate.String())
 	return rate, nil
 }
 

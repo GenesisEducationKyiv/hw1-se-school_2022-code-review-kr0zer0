@@ -6,7 +6,7 @@ import "api/internal/entities"
 
 type (
 	GetRateUseCase interface {
-		GetBtcUahRate() (float64, error)
+		GetBtcUahRate() (*entities.Rate, error)
 	}
 
 	SendEmailsUseCase interface {
@@ -35,6 +35,6 @@ type (
 	}
 
 	CryptoProvider interface {
-		GetExchangeRate(currencyPair entities.CurrencyPair) (float64, error)
+		GetExchangeRate(currencyPair entities.CurrencyPair) (*entities.Rate, error)
 	}
 )

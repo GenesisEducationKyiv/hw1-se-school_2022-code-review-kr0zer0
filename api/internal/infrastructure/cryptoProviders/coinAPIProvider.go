@@ -35,19 +35,19 @@ type coinAPIResponse struct {
 	Rate float64 `json:"rate"`
 }
 
-func (p *CoinAPIProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (float64, error) {
+func (p *CoinAPIProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (*entities.Rate, error) {
 	response, err := p.makeAPIRequest(string(currencyPair.Base), string(currencyPair.Quote))
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 
 	var mappedResponse coinAPIResponse
 	err = json.Unmarshal(response, &mappedResponse)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 
-	return mappedResponse.Rate, nil
+	return entities.NewRate(currencyPair, mappedResponse.Rate), nil
 }
 
 func (p *CoinAPIProvider) makeAPIRequest(baseCurrency, quoteCurrency string) ([]byte, error) {

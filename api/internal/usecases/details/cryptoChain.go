@@ -23,12 +23,12 @@ func (c *BaseCryptoChain) SetNext(next CryptoChain) {
 	c.next = next
 }
 
-func (c *BaseCryptoChain) GetExchangeRate(currencyPair entities.CurrencyPair) (float64, error) {
+func (c *BaseCryptoChain) GetExchangeRate(currencyPair entities.CurrencyPair) (*entities.Rate, error) {
 	rate, err := c.provider.GetExchangeRate(currencyPair)
 	if err != nil {
 		nextChain := c.next
 		if nextChain == nil {
-			return -1, err
+			return nil, err
 		}
 
 		rate, err = nextChain.GetExchangeRate(currencyPair)

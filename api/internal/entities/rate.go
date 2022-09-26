@@ -1,20 +1,19 @@
 package entities
 
-type Currency string
+import "fmt"
 
-const (
-	BTC Currency = "BTC"
-	UAH Currency = "UAH"
-)
-
-type CurrencyPair struct {
-	Base  Currency
-	Quote Currency
+type Rate struct {
+	CurrencyPair
+	Rate float64
 }
 
-func NewCurrencyPair(base, quote Currency) CurrencyPair {
-	return CurrencyPair{
-		Base:  base,
-		Quote: quote,
+func NewRate(pair CurrencyPair, rate float64) *Rate {
+	return &Rate{
+		CurrencyPair: pair,
+		Rate:         rate,
 	}
+}
+
+func (r *Rate) String() string {
+	return fmt.Sprintf("%v - %v", r.CurrencyPair.String(), r.Rate)
 }
