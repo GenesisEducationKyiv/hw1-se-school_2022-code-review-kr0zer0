@@ -11,7 +11,7 @@ import (
 )
 
 func (h *Handler) sendEmails(c *gin.Context) {
-	err := h.services.EmailSubService.SendToAll()
+	err := h.useCases.SendEmailsUseCase.SendToAll()
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -29,7 +29,7 @@ func (h *Handler) subscribe(c *gin.Context) {
 		return
 	}
 
-	err = h.services.EmailSubService.Subscribe(input.Email)
+	err = h.useCases.SubscribeEmailUseCase.Subscribe(input.Email)
 	if err != nil {
 		if errors.Is(err, customerrors.ErrEmailDuplicate) {
 			response.NewErrorResponse(c, http.StatusConflict, err.Error())

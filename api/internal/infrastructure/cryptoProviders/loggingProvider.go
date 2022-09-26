@@ -1,17 +1,18 @@
-package crypto
+package crypto_providers
 
 import (
 	"api/internal/entities"
+	"api/internal/usecases/usecases_contracts"
 	"log"
 	"reflect"
 )
 
 type LoggingCryptoProvider struct {
-	cryptoProvider Provider
+	cryptoProvider usecases_contracts.CryptoProvider
 }
 
-func NewLoggingCryptoProvider(provider Provider) *LoggingCryptoProvider {
-	return &LoggingCryptoProvider{cryptoProvider: provider}
+func NewLoggingCryptoProvider(cryptoProvider usecases_contracts.CryptoProvider) *LoggingCryptoProvider {
+	return &LoggingCryptoProvider{cryptoProvider: cryptoProvider}
 }
 
 func (l *LoggingCryptoProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (float64, error) {

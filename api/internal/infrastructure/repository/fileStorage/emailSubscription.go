@@ -1,4 +1,4 @@
-package file
+package fileStorage
 
 import (
 	"api/internal/constants"

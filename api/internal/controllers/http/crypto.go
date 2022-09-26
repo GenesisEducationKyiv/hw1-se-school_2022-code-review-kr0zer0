@@ -8,7 +8,7 @@ import (
 )
 
 func (h *Handler) getCurrentExchangeRate(c *gin.Context) {
-	rate, err := h.services.CryptoService.GetBtcUahRate()
+	rate, err := h.useCases.GetRateUseCase.GetBtcUahRate()
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return

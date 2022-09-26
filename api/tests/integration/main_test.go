@@ -5,11 +5,11 @@ import (
 	"api/internal/constants"
 	"api/internal/controllers/http"
 	"api/internal/infrastructure/cryptoProviders"
-	"api/internal/infrastructure/repository/file"
-	"api/internal/service"
-	"api/internal/service/crypto"
-	"api/internal/service/interfaces"
-	mock_service "api/internal/service/mocks"
+	"api/internal/infrastructure/repository/fileStorage"
+	"api/internal/usecases"
+	"api/internal/usecases/details"
+	"api/internal/usecases/usecases_contracts"
+	mock_usecases_contracts "api/internal/usecases/usecases_contracts/mocks"
 	"os"
 	"testing"
 
@@ -24,12 +24,12 @@ type IntegrationTestSuite struct {
 	suite.Suite
 
 	cfg         *config.Config
-	cryptoChain crypto.CryptoChain
+	cryptoChain details.CryptoChain
 	handler     *http.Handler
-	services    *interfaces.Service
-	repos       *interfaces.Repository
+	useCases    *usecases.UseCases
+	repos       *usecases_contracts.Repository
 
-	mailerMock *mock_service.MockMailer
+	mailerMock *mock_usecases_contracts.MockMailer
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -49,7 +49,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	dataToWrite := []byte(`{"emails":[]}`)
 	err = os.WriteFile(TestDataPath, dataToWrite, constants.WriteFilePerm)
 	if err != nil {
-		s.FailNowf("unable to setup data file", err.Error())
+		s.FailNowf("unable to setup data fileStorage", err.Error())
 	}
 
 	s.initDeps()
@@ -58,13 +58,13 @@ func (s *IntegrationTestSuite) SetupSuite() {
 func (s *IntegrationTestSuite) TearDownSuite() {
 	err := os.Truncate(TestDataPath, 0)
 	if err != nil {
-		s.FailNowf("unable to clear data file", err.Error())
+		s.FailNowf("unable to clear data fileStorage", err.Error())
 	}
 }
 
 func (s *IntegrationTestSuite) initDeps() {
 	mockController := gomock.NewController(s.T())
-	s.mailerMock = mock_service.NewMockMailer(mockController)
+	s.mailerMock = mock_usecases_contracts.NewMockMailer(mockController)
 
 	s.cfg = config.GetConfig()
 	coinMarketCapProviderCreator := crypto_providers.NewCoinMarketCapProviderCreator(s.cfg)
@@ -77,19 +77,32 @@ func (s *IntegrationTestSuite) initDeps() {
 	coinAPIProvider := coinAPIProviderCreator.CreateCryptoProvider()
 	coinbaseProvider := coinbaseProviderCreator.CreateCryptoProvider()
 
-	coinMarketCapChain := crypto.NewBaseCryptoChain(coinMarketCapProvider)
-	binanceChain := crypto.NewBaseCryptoChain(binanceProvider)
-	coinAPIChain := crypto.NewBaseCryptoChain(coinAPIProvider)
-	coinbaseChain := crypto.NewBaseCryptoChain(coinbaseProvider)
+	coinMarketCapChain := details.NewBaseCryptoChain(coinMarketCapProvider)
+	binanceChain := details.NewBaseCryptoChain(binanceProvider)
+	coinAPIChain := details.NewBaseCryptoChain(coinAPIProvider)
+	coinbaseChain := details.NewBaseCryptoChain(coinbaseProvider)
 
 	coinMarketCapChain.SetNext(binanceChain)
 	binanceChain.SetNext(coinAPIChain)
 	coinAPIChain.SetNext(coinbaseChain)
 
 	s.cryptoChain = coinMarketCapChain
-	s.repos = &interfaces.Repository{
-		EmailSubscriptionRepo: file.NewEmailSubscriptionRepository(TestDataPath),
-	}
-	s.services = service.NewService(s.repos, s.cryptoChain, s.mailerMock, s.cfg)
-	s.handler = http.NewHandler(s.services)
+
+	s.repos = initRepos(TestDataPath)
+	s.useCases = initUseCases(s.repos, s.cryptoChain, s.mailerMock, s.cfg)
+	s.handler = http.NewHandler(s.useCases)
+}
+
+func initRepos(filePath string) *usecases_contracts.Repository {
+	emailSub := fileStorage.NewEmailSubscriptionRepository(filePath)
+
+	return fileStorage.NewRepository(emailSub)
+}
+
+func initUseCases(repositories *usecases_contracts.Repository, cryptoChain details.CryptoChain, mailer usecases_contracts.Mailer, cfg *config.Config) *usecases.UseCases {
+	getRate := details.NewCachedRateGetter(usecases.NewGetRateUseCase(cryptoChain), cfg.Cache.RateCacheTTL)
+	sendEmails := usecases.NewSendEmailsUseCase(repositories.EmailSubscriptionRepo, mailer, getRate)
+	subscribeEmails := usecases.NewSubscribeEmailUseCase(repositories.EmailSubscriptionRepo)
+
+	return usecases.NewUseCases(getRate, sendEmails, subscribeEmails)
 }

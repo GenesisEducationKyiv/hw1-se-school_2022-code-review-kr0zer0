@@ -1,19 +1,19 @@
 package http
 
 import (
-	"api/internal/service/interfaces"
+	"api/internal/usecases"
 	"github.com/gin-gonic/gin"
 )
 
 //go:generate mockgen -source=router.go -destination=mocks/serviceMock.go
 
 type Handler struct {
-	services *interfaces.Service
+	useCases *usecases.UseCases
 }
 
-func NewHandler(services *interfaces.Service) *Handler {
+func NewHandler(useCases *usecases.UseCases) *Handler {
 	return &Handler{
-		services: services,
+		useCases: useCases,
 	}
 }
 
