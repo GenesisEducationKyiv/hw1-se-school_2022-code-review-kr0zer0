@@ -3,11 +3,13 @@ package integration
 import (
 	"api/config"
 	"api/internal/constants"
-	"api/internal/handler"
-	"api/internal/repository"
-	"api/internal/service"
-	"api/internal/service/cryptoProviders"
-	mock_service "api/internal/service/mocks"
+	"api/internal/controllers/http"
+	"api/internal/infrastructure/cryptoProviders"
+	"api/internal/infrastructure/repository/fileStorage"
+	"api/internal/usecases"
+	"api/internal/usecases/details"
+	"api/internal/usecases/usecases_contracts"
+	mock_usecases_contracts "api/internal/usecases/usecases_contracts/mocks"
 	"os"
 	"testing"
 
@@ -22,12 +24,12 @@ type IntegrationTestSuite struct {
 	suite.Suite
 
 	cfg         *config.Config
-	cryptoChain service.CryptoChain
-	handler     *handler.HTTPHandler
-	services    *handler.Service
-	repos       *service.Repository
+	cryptoChain details.CryptoChain
+	handler     *http.Handler
+	useCases    *usecases.UseCases
+	repos       *usecases_contracts.Repository
 
-	emailSendingMock *mock_service.MockEmailSendingRepo
+	mailerMock *mock_usecases_contracts.MockMailer
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -47,7 +49,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	dataToWrite := []byte(`{"emails":[]}`)
 	err = os.WriteFile(TestDataPath, dataToWrite, constants.WriteFilePerm)
 	if err != nil {
-		s.FailNowf("unable to setup data file", err.Error())
+		s.FailNowf("unable to setup data fileStorage", err.Error())
 	}
 
 	s.initDeps()
@@ -56,13 +58,13 @@ func (s *IntegrationTestSuite) SetupSuite() {
 func (s *IntegrationTestSuite) TearDownSuite() {
 	err := os.Truncate(TestDataPath, 0)
 	if err != nil {
-		s.FailNowf("unable to clear data file", err.Error())
+		s.FailNowf("unable to clear data fileStorage", err.Error())
 	}
 }
 
 func (s *IntegrationTestSuite) initDeps() {
 	mockController := gomock.NewController(s.T())
-	s.emailSendingMock = mock_service.NewMockEmailSendingRepo(mockController)
+	s.mailerMock = mock_usecases_contracts.NewMockMailer(mockController)
 
 	s.cfg = config.GetConfig()
 	coinMarketCapProviderCreator := crypto_providers.NewCoinMarketCapProviderCreator(s.cfg)
@@ -75,20 +77,32 @@ func (s *IntegrationTestSuite) initDeps() {
 	coinAPIProvider := coinAPIProviderCreator.CreateCryptoProvider()
 	coinbaseProvider := coinbaseProviderCreator.CreateCryptoProvider()
 
-	coinMarketCapChain := service.NewBaseCryptoChain(coinMarketCapProvider)
-	binanceChain := service.NewBaseCryptoChain(binanceProvider)
-	coinAPIChain := service.NewBaseCryptoChain(coinAPIProvider)
-	coinbaseChain := service.NewBaseCryptoChain(coinbaseProvider)
+	coinMarketCapChain := details.NewBaseCryptoChain(coinMarketCapProvider)
+	binanceChain := details.NewBaseCryptoChain(binanceProvider)
+	coinAPIChain := details.NewBaseCryptoChain(coinAPIProvider)
+	coinbaseChain := details.NewBaseCryptoChain(coinbaseProvider)
 
 	coinMarketCapChain.SetNext(binanceChain)
 	binanceChain.SetNext(coinAPIChain)
 	coinAPIChain.SetNext(coinbaseChain)
 
 	s.cryptoChain = coinMarketCapChain
-	s.repos = &service.Repository{
-		EmailSubscriptionRepo: repository.NewEmailSubscriptionRepository(TestDataPath),
-		EmailSendingRepo:      s.emailSendingMock,
-	}
-	s.services = service.NewService(s.repos, s.cryptoChain, s.cfg)
-	s.handler = handler.NewHandler(s.services)
+
+	s.repos = initRepos(TestDataPath)
+	s.useCases = initUseCases(s.repos, s.cryptoChain, s.mailerMock, s.cfg)
+	s.handler = http.NewHandler(s.useCases)
+}
+
+func initRepos(filePath string) *usecases_contracts.Repository {
+	emailSub := fileStorage.NewEmailSubscriptionRepository(filePath)
+
+	return fileStorage.NewRepository(emailSub)
+}
+
+func initUseCases(repositories *usecases_contracts.Repository, cryptoChain details.CryptoChain, mailer usecases_contracts.Mailer, cfg *config.Config) *usecases.UseCases {
+	getRate := details.NewCachedRateGetter(usecases.NewGetRateUseCase(cryptoChain), cfg.Cache.RateCacheTTL)
+	sendEmails := usecases.NewSendEmailsUseCase(repositories.EmailSubscriptionRepo, mailer, getRate)
+	subscribeEmails := usecases.NewSubscribeEmailUseCase(repositories.EmailSubscriptionRepo)
+
+	return usecases.NewUseCases(getRate, sendEmails, subscribeEmails)
 }
