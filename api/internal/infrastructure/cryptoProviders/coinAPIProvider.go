@@ -4,6 +4,7 @@ import (
 	"api/config"
 	"api/internal/entities"
 	"encoding/json"
+
 	"github.com/go-resty/resty/v2"
 )
 

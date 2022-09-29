@@ -3,12 +3,13 @@ package app
 import (
 	"api/config"
 	"api/internal/controllers/http"
-	"api/internal/infrastructure/cryptoProviders"
+	crypto_providers "api/internal/infrastructure/cryptoProviders"
 	"api/internal/infrastructure/mailers"
-	"api/internal/infrastructure/repository/fileStorage"
+	"api/internal/infrastructure/repository/filestorage"
 	"api/internal/usecases"
 	"api/internal/usecases/details"
 	"api/internal/usecases/usecases_contracts"
+
 	"github.com/mailjet/mailjet-apiv3-go"
 )
 
@@ -64,12 +65,17 @@ func initCryptoProvidersChain(cfg *config.Config) details.CryptoChain {
 }
 
 func initRepos(filePath string) *usecases_contracts.Repository {
-	emailSub := fileStorage.NewEmailSubscriptionRepository(filePath)
+	emailSub := filestorage.NewEmailSubscriptionRepository(filePath)
 
-	return fileStorage.NewRepository(emailSub)
+	return filestorage.NewRepository(emailSub)
 }
 
-func initUseCases(repositories *usecases_contracts.Repository, cryptoChain details.CryptoChain, mailer usecases_contracts.Mailer, cfg *config.Config) *usecases.UseCases {
+func initUseCases(
+	repositories *usecases_contracts.Repository,
+	cryptoChain details.CryptoChain,
+	mailer usecases_contracts.Mailer,
+	cfg *config.Config,
+) *usecases.UseCases {
 	getRate := details.NewCachedRateGetter(usecases.NewGetRateUseCase(cryptoChain), cfg.Cache.RateCacheTTL)
 	sendEmails := usecases.NewSendEmailsUseCase(repositories.EmailSubscriptionRepo, mailer, getRate)
 	subscribeEmails := usecases.NewSubscribeEmailUseCase(repositories.EmailSubscriptionRepo)

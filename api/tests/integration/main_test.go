@@ -4,8 +4,8 @@ import (
 	"api/config"
 	"api/internal/constants"
 	"api/internal/controllers/http"
-	"api/internal/infrastructure/cryptoProviders"
-	"api/internal/infrastructure/repository/fileStorage"
+	crypto_providers "api/internal/infrastructure/cryptoProviders"
+	"api/internal/infrastructure/repository/filestorage"
 	"api/internal/usecases"
 	"api/internal/usecases/details"
 	"api/internal/usecases/usecases_contracts"
@@ -49,7 +49,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	dataToWrite := []byte(`{"emails":[]}`)
 	err = os.WriteFile(TestDataPath, dataToWrite, constants.WriteFilePerm)
 	if err != nil {
-		s.FailNowf("unable to setup data fileStorage", err.Error())
+		s.FailNowf("unable to setup data filestorage", err.Error())
 	}
 
 	s.initDeps()
@@ -58,7 +58,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 func (s *IntegrationTestSuite) TearDownSuite() {
 	err := os.Truncate(TestDataPath, 0)
 	if err != nil {
-		s.FailNowf("unable to clear data fileStorage", err.Error())
+		s.FailNowf("unable to clear data filestorage", err.Error())
 	}
 }
 
@@ -94,12 +94,17 @@ func (s *IntegrationTestSuite) initDeps() {
 }
 
 func initRepos(filePath string) *usecases_contracts.Repository {
-	emailSub := fileStorage.NewEmailSubscriptionRepository(filePath)
+	emailSub := filestorage.NewEmailSubscriptionRepository(filePath)
 
-	return fileStorage.NewRepository(emailSub)
+	return filestorage.NewRepository(emailSub)
 }
 
-func initUseCases(repositories *usecases_contracts.Repository, cryptoChain details.CryptoChain, mailer usecases_contracts.Mailer, cfg *config.Config) *usecases.UseCases {
+func initUseCases(
+	repositories *usecases_contracts.Repository,
+	cryptoChain details.CryptoChain,
+	mailer usecases_contracts.Mailer,
+	cfg *config.Config,
+) *usecases.UseCases {
 	getRate := details.NewCachedRateGetter(usecases.NewGetRateUseCase(cryptoChain), cfg.Cache.RateCacheTTL)
 	sendEmails := usecases.NewSendEmailsUseCase(repositories.EmailSubscriptionRepo, mailer, getRate)
 	subscribeEmails := usecases.NewSubscribeEmailUseCase(repositories.EmailSubscriptionRepo)

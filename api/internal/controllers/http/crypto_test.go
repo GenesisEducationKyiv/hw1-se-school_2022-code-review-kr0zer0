@@ -28,7 +28,9 @@ func TestHTTPHandler_getCurrentExchangeRate(t *testing.T) {
 		{
 			name: "OK",
 			mockBehavior: func(s *mock_usecases_contracts.MockGetRateUseCase) {
-				s.EXPECT().GetBtcUahRate().Return(entities.NewRate(entities.NewCurrencyPair(entities.BTC, entities.UAH), 777.777), nil)
+				s.EXPECT().
+					GetBtcUahRate().
+					Return(entities.NewRate(entities.NewCurrencyPair(entities.BTC, entities.UAH), 777.777), nil)
 			},
 			expectedStatusCode:   http.StatusOK,
 			expectedResponseBody: "777.777",
