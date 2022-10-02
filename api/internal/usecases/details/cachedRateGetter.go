@@ -3,8 +3,9 @@ package details
 import (
 	"api/internal/entities"
 	"api/internal/usecases"
-	"github.com/jellydator/ttlcache/v3"
 	"time"
+
+	"github.com/jellydator/ttlcache/v3"
 )
 
 type CachedRateGetter struct {

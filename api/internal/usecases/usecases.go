@@ -10,7 +10,11 @@ type UseCases struct {
 	usecases_contracts.SubscribeEmailUseCase
 }
 
-func NewUseCases(getRate usecases_contracts.GetRateUseCase, sendEmails usecases_contracts.SendEmailsUseCase, subscribeEmails usecases_contracts.SubscribeEmailUseCase) *UseCases {
+func NewUseCases(
+	getRate usecases_contracts.GetRateUseCase,
+	sendEmails usecases_contracts.SendEmailsUseCase,
+	subscribeEmails usecases_contracts.SubscribeEmailUseCase,
+) *UseCases {
 	return &UseCases{
 		GetRateUseCase:        getRate,
 		SendEmailsUseCase:     sendEmails,

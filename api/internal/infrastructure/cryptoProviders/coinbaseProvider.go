@@ -2,11 +2,13 @@ package crypto_providers
 
 import (
 	"api/config"
+	"api/internal/constants"
 	"api/internal/entities"
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	"strconv"
+
+	"github.com/go-resty/resty/v2"
 )
 
 type (
@@ -47,7 +49,7 @@ func (p *CoinbaseProvider) GetExchangeRate(currencyPair entities.CurrencyPair) (
 		return nil, err
 	}
 
-	price, err := strconv.ParseFloat(mappedResponse.Data.Amount, 64)
+	price, err := strconv.ParseFloat(mappedResponse.Data.Amount, constants.Float64Size)
 	if err != nil {
 		return nil, fmt.Errorf("can't parse %v to float", price)
 	}

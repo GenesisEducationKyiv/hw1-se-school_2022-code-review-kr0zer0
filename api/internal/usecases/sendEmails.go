@@ -11,7 +11,11 @@ type SendEmailsUseCase struct {
 	getRateUseCase usecases_contracts.GetRateUseCase
 }
 
-func NewSendEmailsUseCase(emailSubsRepo usecases_contracts.EmailSubscriptionRepo, mailer usecases_contracts.Mailer, cryptoService usecases_contracts.GetRateUseCase) *SendEmailsUseCase {
+func NewSendEmailsUseCase(
+	emailSubsRepo usecases_contracts.EmailSubscriptionRepo,
+	mailer usecases_contracts.Mailer,
+	cryptoService usecases_contracts.GetRateUseCase,
+) *SendEmailsUseCase {
 	return &SendEmailsUseCase{
 		emailSubsRepo:  emailSubsRepo,
 		mailer:         mailer,
@@ -30,7 +34,7 @@ func (u *SendEmailsUseCase) SendToAll() error {
 		return err
 	}
 
-	err = u.mailer.SendToList(emails, fmt.Sprintf("%.2fUAH", rate))
+	err = u.mailer.SendToList(emails, fmt.Sprintf("%.2fUAH", rate.Rate))
 	if err != nil {
 		return err
 	}
