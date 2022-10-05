@@ -3,7 +3,7 @@ app:
 
 cryptoProviders:
   coinMarketCap:
-    url: 'https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/lates'
+    url: 'https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest'
     headerName: 'X-CMC_PRO_API_KEY'
   binance:
     url: 'https://api.binance.com/api/v3/ticker/price'
