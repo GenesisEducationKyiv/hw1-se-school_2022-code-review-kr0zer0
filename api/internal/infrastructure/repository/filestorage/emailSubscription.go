@@ -4,6 +4,7 @@ import (
 	"api/internal/constants"
 	customerrors "api/internal/customerrors"
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"os"
 	"sort"
 
@@ -12,11 +13,13 @@ import (
 
 type EmailSubscriptionRepository struct {
 	filepath string
+	logger   *logrus.Logger
 }
 
-func NewEmailSubscriptionRepository(filepath string) *EmailSubscriptionRepository {
+func NewEmailSubscriptionRepository(filepath string, logger *logrus.Logger) *EmailSubscriptionRepository {
 	return &EmailSubscriptionRepository{
 		filepath: filepath,
+		logger:   logger,
 	}
 }
 
@@ -28,6 +31,7 @@ func (r *EmailSubscriptionRepository) Add(email string) error {
 
 	emails, err = r.addToSorted(emails, email)
 	if err != nil {
+		r.logger.Error(err.Error())
 		return err
 	}
 
@@ -52,11 +56,13 @@ func (r *EmailSubscriptionRepository) GetAll() ([]string, error) {
 	records := data.SubscribedEmails{}
 	file, err := os.ReadFile(r.filepath)
 	if err != nil {
+		r.logger.Error(err.Error())
 		return nil, err
 	}
 
 	err = json.Unmarshal(file, &records)
 	if err != nil {
+		r.logger.Error(err.Error())
 		return nil, err
 	}
 	return records.Emails, nil
