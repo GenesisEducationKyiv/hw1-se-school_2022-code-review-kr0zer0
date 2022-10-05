@@ -3,6 +3,7 @@ package mailers
 import (
 	"api/config"
 	"fmt"
+	"github.com/sirupsen/logrus"
 
 	"github.com/mailjet/mailjet-apiv3-go"
 )
@@ -10,12 +11,14 @@ import (
 type MailjetMailer struct {
 	cfg           *config.Config
 	mailjetClient *mailjet.Client
+	logger        *logrus.Logger
 }
 
-func NewMailjetMailer(cfg *config.Config, mailjetClient *mailjet.Client) *MailjetMailer {
+func NewMailjetMailer(cfg *config.Config, mailjetClient *mailjet.Client, logger *logrus.Logger) *MailjetMailer {
 	return &MailjetMailer{
 		cfg:           cfg,
 		mailjetClient: mailjetClient,
+		logger:        logger,
 	}
 }
 
@@ -32,6 +35,7 @@ func (r *MailjetMailer) SendToList(emails []string, message string) error {
 
 	_, err := r.mailjetClient.SendMail(email)
 	if err != nil {
+		r.logger.Error(err.Error())
 		return err
 	}
 

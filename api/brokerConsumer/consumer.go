@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	conn, err := amqp.Dial("amqp://test:test@172.19.0.1:5672/")
+	conn, err := amqp.Dial("amqp://test:test@localhost:5672/")
 	if err != nil {
 		panic(err)
 	}
@@ -45,10 +45,10 @@ func main() {
 
 	go func() {
 		for d := range logs {
-			fmt.Printf("Received a message: %s\n", d.Body)
+			fmt.Printf("%s\n", d.Body)
 		}
 	}()
 
-	fmt.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+	fmt.Printf(" [*] Waiting for messages. To exit press CTRL+C\n")
 	<-forever
 }

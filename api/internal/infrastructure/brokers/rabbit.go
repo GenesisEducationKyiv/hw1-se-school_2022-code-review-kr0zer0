@@ -3,38 +3,36 @@ package brokers
 import (
 	"context"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"log"
 )
 
 type BrokerWriter struct {
+	connection *amqp.Connection
+}
+
+func NewBrokerWriter(connection *amqp.Connection) *BrokerWriter {
+	return &BrokerWriter{connection: connection}
 }
 
 func (w BrokerWriter) Write(bytes []byte) (int, error) {
-	conn, err := amqp.Dial("amqp://test:test@localhost:5672/")
-	if err != nil {
-		return -1, err
-	}
-	defer conn.Close()
 
-	ch, err := conn.Channel()
+	ch, err := w.connection.Channel()
 	if err != nil {
 		return -1, err
 	}
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"hello", // name
-		false,   // durable
-		false,   // delete when unused
-		false,   // exclusive
-		false,   // no-wait
-		nil,     // arguments
+		"logs", // name
+		false,  // durable
+		false,  // delete when unused
+		false,  // exclusive
+		false,  // no-wait
+		nil,    // arguments
 	)
 	if err != nil {
 		return -1, err
 	}
 
-	body := "Hello World!"
 	err = ch.PublishWithContext(context.Background(),
 		"",     // exchange
 		q.Name, // routing key
@@ -47,6 +45,6 @@ func (w BrokerWriter) Write(bytes []byte) (int, error) {
 	if err != nil {
 		return -1, err
 	}
-	log.Printf(" [x] Sent %s\n", body)
+
 	return len(bytes), nil
 }
